@@ -14,15 +14,28 @@ service cloud.firestore {
       return request.resource.data.diff(resource.data).affectedKeys().hasOnly(fields);
     }
 
+    function validProfile() {
+      return !request.resource.data.keys().hasAny(['profile'])
+        || (
+          request.resource.data.profile is map
+          && (
+            !request.resource.data.profile.keys().hasAny(['onboardingSeen'])
+            || request.resource.data.profile.onboardingSeen is bool
+          )
+        );
+    }
+
     match /users/{userId} {
       allow read: if isOwner(userId);
 
       // Profile and threshold writes are user-owned. The server remains the
       // only writer for telemetry and generated intelligence.
       allow create: if isOwner(userId)
-        && request.resource.data.keys().hasOnly(['profile', 'thresholds', 'createdAt']);
+        && request.resource.data.keys().hasOnly(['profile', 'thresholds', 'createdAt'])
+        && validProfile();
       allow update: if isOwner(userId)
-        && changedOnly(['profile', 'thresholds']);
+        && changedOnly(['profile', 'profile.onboardingSeen', 'thresholds'])
+        && validProfile();
       allow delete: if false;
 
       match /transactions/{transactionId} {
@@ -48,7 +61,10 @@ service cloud.firestore {
       match /notifications/{notificationId} {
         allow read, delete: if isOwner(userId);
         allow create: if isOwner(userId)
-          && request.resource.data.keys().hasOnly(['subject', 'message', 'type', 'read', 'createdAt']);
+          && request.resource.data.keys().hasOnly([
+            'subject', 'message', 'type', 'read', 'createdAt',
+            'category', 'name', 'key', 'threshold'
+          ]);
         allow update: if isOwner(userId)
           && changedOnly(['read']);
       }

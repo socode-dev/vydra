@@ -18,7 +18,7 @@ const AdminLayout = () => {
           sidebarCollapsed ? "w-18" : "w-72",
         )}
       >
-        <AdminSidebar collapsed={sidebarCollapsed} />
+        <AdminSidebar collapsed={sidebarCollapsed} onToggleSidebar={() => setSidebarCollapsed(value => !value)} />
       </div>
 
       {mobileOpen && (
@@ -29,6 +29,7 @@ const AdminLayout = () => {
             onClick={() => setMobileOpen(false)}
             aria-label="Close admin navigation"
           />
+          
           <div className="relative h-full w-72 max-w-[calc(100vw-2rem)]">
             <AdminSidebar mobile collapsed={false} onClose={() => setMobileOpen(false)} />
           </div>
@@ -36,11 +37,8 @@ const AdminLayout = () => {
       )}
 
       <div className="flex min-h-0 min-w-0 flex-1 flex-col">
-        <AdminHeader
-          collapsed={sidebarCollapsed}
-          onMenuOpen={() => setMobileOpen(true)}
-          onToggleSidebar={() => setSidebarCollapsed(value => !value)}
-        />
+        <AdminHeader onMenuOpen={() => setMobileOpen(true)} />
+
         <main className="min-h-0 min-w-0 flex-1 overflow-y-auto scrollbar-thin">
           <Outlet />
         </main>

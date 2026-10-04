@@ -1,12 +1,14 @@
 import { toast } from "react-hot-toast";
 import { useFormContext } from "../context/FormContext";
 import { useModalContext } from "../context/ModalContext";
-import { addDocument, createNotification } from "../firebase/firestore";
+import { addDocument, createNotification, getAllDocuments } from "../firebase/firestore";
+import { CATEGORY_OPTIONS } from "../data/categoryData";
 import useCurrencyStore from "../store/useCurrencyStore";
 import useTransactionStore from "../store/useTransactionStore";
 import { formatAmount } from "../utils/formatAmount";
 import { generateCategoryKey } from "../utils/generateKey";
 import { getSnakeCaseValue } from "../utils/snakeCaseValue";
+import { categoryNameExists } from "../utils/categoryName";
 
 const FORM_LABELS = {
   TRANSACTIONS: "transactions",
@@ -85,6 +87,18 @@ const shouldSaveCustomCategory = ({ data, formType, mode }) => {
   return mode !== "edit" && Boolean(data.name?.trim()) && (isTransaction || isBudget);
 };
 
+const saveCustomCategoryIfNew = async (userUID, record) => {
+  const storedCategories = (await getAllDocuments(userUID, "categories")) ?? [];
+  const knownCategories = [...CATEGORY_OPTIONS, ...storedCategories];
+
+  if (categoryNameExists(record.category, knownCategories)) return;
+
+  await addDocument(userUID, "categories", {
+    name: record.category,
+    categoryKey: record.categoryKey,
+  });
+};
+
 const shouldCreateLargeExpenseNotification = ({
   label,
   record,
@@ -132,10 +146,7 @@ const useFormSubmit = (label, mode) => {
         await addTransactionToStore(userUID, label, record);
 
         if (shouldSaveCustomCategory({ data, formType, mode })) {
-          await addDocument(userUID, "categories", {
-            name: record.category,
-            categoryKey: record.categoryKey,
-          });
+          await saveCustomCategoryIfNew(userUID, record);
         }
       }
 

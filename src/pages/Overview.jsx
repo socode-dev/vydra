@@ -37,21 +37,9 @@ const Overview = () => {
   
   return (
     <motion.div
-      initial={
-        reducedMotion
-          ? false
-          : {
-              opacity: 0,
-              y: 12,
-            }
-      }
-      animate={{
-        opacity: 1,
-        y: 0,
-      }}
-      transition={{
-        duration: 0.25,
-      }}
+      initial={ reducedMotion ? false : { opacity: 0, y: 12 } }
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.25 }}
       className="mx-auto min-w-0 w-full max-w-[90rem] space-y-8 px-4 py-8 sm:px-6"
     >
       <ScrollToTop />
@@ -104,13 +92,14 @@ const Overview = () => {
       </header>
 
       <section
+        id="financial-summary"
         aria-label="Financial summary"
         className="grid grid-cols-1 gap-4 sm:grid-cols-2 min-[1280px]:grid-cols-4"
       >
         <SummaryCards />
       </section>
 
-      <section id="financial-charts" aria-label="Financial Overview">
+      <section id="financial-overview" aria-label="Financial Overview">
         <Charts />
       </section>
 

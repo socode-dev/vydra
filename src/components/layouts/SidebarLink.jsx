@@ -6,7 +6,7 @@ const SidebarLink = ({ to, label, icon: Icon, collapsed, onClick }) => (
   <Tooltip content={label} side="right" disabled={!collapsed}>
     <NavLink
       to={to}
-      end={to === "/" || to === "/demo"}
+      end={to === "/" || to === "/dashboard" || to === "/demo"}
       onClick={onClick}
       aria-label={label}
       className={({ isActive }) =>

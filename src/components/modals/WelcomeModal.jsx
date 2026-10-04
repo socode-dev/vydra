@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import { isDemoUser, useDemoMode } from "../../demo/useDemoMode";
 import useAuthStore from "../../store/useAuthStore";
 import useOnboardingStore from "../../store/useOnboardingStore";
@@ -8,34 +8,46 @@ import BrandMark from "../ui/BrandMark";
 import { FiCompass, FiX } from "react-icons/fi";
 
 const WelcomeModal = () => {
+  const [isDismissed, setIsDismissed] = useState(false);
+  const [tourPending, setTourPending] = useState(false);
   const isDemoMode = useDemoMode();
   const user = useAuthStore((state) => state.currentUser);
-  const hasCompletedOnboarding = useOnboardingStore(state => state.hasCompletedOnboarding);
-  const completedOnboardingUsers = useOnboardingStore(state => state.completedOnboardingUsers);
-  const setOnboardingCompleted = useOnboardingStore(state => state.setOnboardingCompleted);
+  const onboardingSeen = useAuthStore((state) => state.onboardingSeen);
+  const onboardingReady = useAuthStore((state) => state.onboardingReady);
+  const setOnboardingSeen = useAuthStore((state) => state.setOnboardingSeen);
   const enableTourForUser = useOnboardingStore(state => state.enableTourForUser);
   const startTour = useOnboardingStore((state) => state.startTour);
   
-  const hasSeenWelcome = user?.uid
-    ? completedOnboardingUsers.includes(user.uid) ||
-      (hasCompletedOnboarding && completedOnboardingUsers.length === 0)
-    : hasCompletedOnboarding;
-  
-    const handleTour = useCallback(() => {
+  const handleTour = useCallback(() => {
+    setIsDismissed(true);
+    setTourPending(true);
+
+    void setOnboardingSeen(true, user?.uid);
     enableTourForUser(user?.uid);
+  }, [enableTourForUser, setOnboardingSeen, user?.uid]);
+
+  const handleExitComplete = useCallback(() => {
+    if (!tourPending) return;
+
     startTour("overview", user?.uid);
-  }, [enableTourForUser, startTour, user?.uid]);
+    setTourPending(false);
+  }, [startTour, tourPending, user?.uid]);
   
   const handleSkip = useCallback(() => {
-    setOnboardingCompleted(user?.uid);
-  }, [setOnboardingCompleted, user?.uid]);
+    setIsDismissed(true);
+    void setOnboardingSeen(false, user?.uid);
+  }, [setOnboardingSeen, user?.uid]);
   
-  if (!user || isDemoMode || isDemoUser(user) || hasSeenWelcome) {
+  if (!user || !onboardingReady || isDemoMode || isDemoUser(user)) {
     return null;
   }
+
+  const open = !isDismissed && onboardingSeen !== true;
   
   return (
     <Dialog
+      open={open}
+      onExitComplete={handleExitComplete}
       ariaLabel="Welcome to Vydra"
       onClose={handleSkip}
       className="p-0! gap-0! items-stretch!"

@@ -1,5 +1,5 @@
 import Button from "../ui/Button";
-import { getDemoPath, useDemoMode } from "../../demo/useDemoMode";
+import { getCustomerPath, getDemoPath, useDemoMode } from "../../demo/useDemoMode";
 import { useNavigate } from "react-router-dom";
 import useAuthStore from "../../store/useAuthStore";
 import useNotificationStore from "../../store/useNotificationStore";
@@ -35,7 +35,7 @@ export default function HeaderActions() {
           className="relative size-11 min-h-11 shrink-0 p-0!"
           onClick={() =>
             navigate(
-              isDemoMode ? getDemoPath("/notifications") : "/notifications",
+              isDemoMode ? getDemoPath("/notifications") : getCustomerPath("/notifications"),
             )
           }
           aria-label={`Notifications (${unread} unread)`}

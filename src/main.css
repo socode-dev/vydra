@@ -131,22 +131,99 @@ body {
   @apply bg-background text-foreground antialiased transition-colors duration-100;
 }
 
-.scrollbar-thin {
+.vydra-toast {
+  background: var(--card) !important;
+  color: var(--foreground) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 0.75rem !important;
+  box-shadow: 0 1rem 2.5rem color-mix(in srgb, var(--foreground) 16%, transparent) !important;
+  font-family: var(--font-sans) !important;
+  font-size: 0.875rem !important;
+  line-height: 1.4 !important;
+  max-width: min(24rem, calc(100vw - 2rem)) !important;
+  min-height: 3.25rem !important;
+  padding: 0.8rem 1rem !important;
+}
+
+.vydra-toast-success {
+  border-color: color-mix(in srgb, var(--success) 48%, var(--border)) !important;
+}
+
+.vydra-toast-error {
+  border-color: color-mix(in srgb, var(--danger) 52%, var(--border)) !important;
+}
+
+*,
+*::before,
+*::after {
   scrollbar-width: thin;
   scrollbar-color: var(--primary) var(--surface);
 }
 
-.scrollbar-thin::-webkit-scrollbar {
+*::-webkit-scrollbar {
   width: 4px;
   height: 4px;
 }
 
-.scrollbar-thin::-webkit-scrollbar-track {
+*::-webkit-scrollbar-track {
   background: var(--color-bg);
 }
 
-.scrollbar-thin::-webkit-scrollbar-thumb {
+*::-webkit-scrollbar-thumb {
   background-color: var(--primary);
   border-radius: 9999px;
   border: 2px solid var(--surface);
+}
+
+.scrollbar-thin {
+  scrollbar-width: thin;
+}
+
+.marketing-page {
+  --marketing-glow: color-mix(in srgb, var(--primary) 22%, transparent);
+  --marketing-frame: color-mix(in srgb, var(--card) 92%, transparent);
+  --marketing-muted-foreground: color-mix(in srgb, var(--muted-foreground) 84%, var(--foreground));
+}
+
+.marketing-page .text-muted-foreground {
+  color: var(--marketing-muted-foreground);
+}
+
+.marketing-page .marketing-hero-glow {
+  background: radial-gradient(ellipse at center top, var(--marketing-glow), transparent 68%);
+}
+
+.marketing-page .marketing-product-frame {
+  background: var(--marketing-frame);
+}
+
+.marketing-page .marketing-screenshot-window {
+  -webkit-mask-image: linear-gradient(to bottom, black 0%, black 86%, transparent 100%);
+  mask-image: linear-gradient(to bottom, black 0%, black 86%, transparent 100%);
+}
+
+.marketing-page .marketing-section-emphasis {
+  background: color-mix(in srgb, var(--surface) 54%, var(--background));
+}
+
+.marketing-page .marketing-flow::before {
+  position: absolute;
+  top: 1.75rem;
+  bottom: 1.75rem;
+  left: 0.35rem;
+  width: 1px;
+  background: color-mix(in srgb, var(--primary) 44%, var(--border));
+  content: "";
+}
+
+.marketing-page .marketing-screenshot-fade {
+  background: linear-gradient(to bottom, transparent, var(--background));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .marketing-page *,
+  .marketing-page *::before,
+  .marketing-page *::after {
+    scroll-behavior: auto !important;
+  }
 }

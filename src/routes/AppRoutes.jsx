@@ -21,6 +21,8 @@ import AdminIntelligence from "../pages/AdminIntelligence";
 import AdminDataOperations from "../pages/AdminDataOperations";
 import AdminCustomerActivity from "../pages/AdminCustomerActivity";
 import AdminInvestigation from "../pages/AdminInvestigation";
+import MarketingHome from "../pages/MarketingHome";
+import About from "../pages/About";
 
 export default function AppRoutes() {
   const dashboardRoutes = dashboardPages.map(
@@ -79,7 +81,7 @@ export default function AppRoutes() {
         {dashboardRoutes}
       </Route>
       <Route
-        path="/"
+        path="/dashboard"
         element={
           <ProtectedRoute>
             <MainLayout />
@@ -88,6 +90,15 @@ export default function AppRoutes() {
       >
         {dashboardRoutes}
       </Route>
+      <Route
+        path="/"
+        element={
+          <PublicRoute>
+            <MarketingHome />
+          </PublicRoute>
+        }
+      />
+      <Route path="/about" element={<About />} />
       <Route
         path="/admin"
         element={

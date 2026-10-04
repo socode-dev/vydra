@@ -3,7 +3,6 @@ import { useState } from "react";
 import Header from "../components/layouts/Header";
 import Sidebar from "../components/layouts/Sidebar";
 import SignoutPrompt from "../components/modals/SignoutPrompt";
-import { Toaster } from "react-hot-toast";
 import FormModal from "../components/modals/FormModal";
 import NotificationDialog from "../components/modals/NotificationDialog";
 import Preferences from "../components/modals/Preferences";
@@ -12,6 +11,7 @@ import TourJoyride from "../components/ui/TourJoyride";
 import DemoBadge from "../demo/DemoBadge";
 import { useDemoMode } from "../demo/useDemoMode";
 import AccountVerificationBanner from "../components/layouts/AccountVerificationBanner";
+import VydraToaster from "../components/ui/VydraToaster";
 
 const MainLayout = () => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -19,7 +19,7 @@ const MainLayout = () => {
 
   return (
     <div className="relative flex h-dvh min-w-0 overflow-hidden bg-background font-sans text-foreground tracking-normal">
-      <Toaster />
+      <VydraToaster />
 
       <WelcomeModal />
       {!isDemoMode && <TourJoyride />}
@@ -38,14 +38,13 @@ const MainLayout = () => {
       <Preferences />
 
       {/* Sidebar */}
-      <Sidebar collapsed={sidebarCollapsed} />
+      <Sidebar
+        collapsed={sidebarCollapsed}
+        onToggleSidebar={() => setSidebarCollapsed((value) => !value)} />
 
       {/* Main Content */}
       <div className="flex min-h-0 min-w-0 flex-1 flex-col">
-        <Header
-          collapsed={sidebarCollapsed}
-          onToggleSidebar={() => setSidebarCollapsed((value) => !value)}
-        />
+        <Header />
 
         <main
           id="main-content"

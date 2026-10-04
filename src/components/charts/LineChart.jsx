@@ -5,7 +5,7 @@ import { formatAmount } from "../../utils/formatAmount";
 import useCurrencyStore from "../../store/useCurrencyStore";
 import { Link } from "react-router-dom";
 import { FiTrendingUp } from "react-icons/fi";
-import { getDemoPath, useDemoMode } from "../../demo/useDemoMode";
+import { getCustomerPath, getDemoPath, useDemoMode } from "../../demo/useDemoMode";
 import Button from "../ui/Button";
 
 const hoverVerticalLine = (gridColor) => {
@@ -78,7 +78,7 @@ const LineChart = () => {
           </p>
           <Button
             as={Link}
-            to={isDemoMode ? getDemoPath("/transactions") : "/transactions"}
+            to={isDemoMode ? getDemoPath("/transactions") : getCustomerPath("/transactions")}
             variant="outline"
           >
             Add a transaction

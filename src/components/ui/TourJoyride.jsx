@@ -15,12 +15,12 @@ const TourJoyride = () => {
   const [joyrideKey, setJoyrideKey] = useState(0);
 
   useEffect(() => {
-    if (tourActive && pathname === "/") {
+    if (tourActive && pathname === "/dashboard") {
       setJoyrideKey((previous) => previous + 1);
     }
   }, [pathname, tourActive]);
 
-  if (!tourActive || pathname !== "/") return null;
+  if (!tourActive || pathname !== "/dashboard") return null;
 
   const steps = overviewSteps.filter((step) => {
     if (typeof document === "undefined") return true;

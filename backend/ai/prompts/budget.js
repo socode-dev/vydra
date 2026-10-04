@@ -25,14 +25,10 @@ STRICT RULES:
 - Be direct and factual
 - Keep total response under 80 words
 
-- Never use phrases like: 
-"Your projected spending is..."
-"Projected total spend..."
-"Forecasted spending..."
-- When discussing future spending, explain it naturally in conversational language.
-- Example:
-Instead of "Your projected spending is $6,200",
-say "At your current pace, you will spend around $6,200 by month end."
+- Never calculate, state, or request a projected total or month-end projection.
+- Do not mention the projected total from the data in the response.
+- When the budget is exceeded, describe the consequence in plain language instead:
+"At your current pace, you will spend more than planned, which may negatively affect your financial stability."
 
 - Return ONLY JSON
 
@@ -46,10 +42,8 @@ EXPLANATION MUST INCLUDE:
 - Budget amount and amount spent
 - % of budget used
 - Time context (must include days remaining when less than 7)
-- Projected total by month end for current month
-
-- If the month is complete (0 days remaining), DO NOT include projection.
-- Instead summarize the final outcome and focus on what to improve next month
+- Do not include a projected total, even for the current month or when days remain.
+- If the month is complete (0 days remaining), summarize the final outcome and focus on what to improve next month.
 
 SUGGESTION MUST:
 - Give a specific, actionable instruction
@@ -59,9 +53,10 @@ SUGGESTION MUST:
 IMPORTANT:
 - For EXCEEDED: do NOT suggest stopping spending completely
 - For essential categories: suggest reducing to essentials, not zero spending
+- For EXCEEDED: do not say "to stay within your budget" because the budget has already been exceeded; recommend reducing further overspending instead
 
 Example JSON:
-{"explanation": "You set a ${formatAmount({amount: 500, currency})} food budget for May. You have spent ${formatAmount({amount: 495.73, currency})}, which is 34% of your budget with 2 days left. At your current pace, you will spend around ${formatAmount({amount: 530, currency})} by month end.",
+{"explanation": "You set a ${formatAmount({amount: 500, currency})} food budget for May. You have spent ${formatAmount({amount: 495.73, currency})}, which is 99% of your budget with 2 days left. Your spending is close to the planned limit and needs attention for the rest of the month.",
 "suggestion": "Limit your food spending to about ${formatAmount({amount: 16, currency})} per day for the remaining 2 days to reduce further overspending."}
 
 DATA:
@@ -70,7 +65,6 @@ Budget: ${formatAmount({amount: budget.amount, currency})} for ${budget.month}
 Spent: ${formatAmount({amount: spending.total_spent, currency})} (${derived.percent_budget_used}% used)
 Month progress: ${time.percent_of_month_elapsed}% elapsed
 Days remaining: ${time.days_remaining}
-Projected total: ${formatAmount({amount: derived.projected_total, currency})}
 Safe daily spend: ${formatAmount({amount: derived.safe_daily_spend, currency})}/day
 Status: ${derived.compliance_status}
 Is current month: ${time.is_current_month}

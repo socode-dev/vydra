@@ -21,7 +21,7 @@
       "destination": "/api/adminTelemetry?section=events"
     },
     {
-      "source": "/((?!api/|assets/|src/|@vite/|@react-refresh|node_modules/|@fs/|favicon\\.png|og-image\\.jpg|site\\.webmanifest).*)",
+      "source": "/((?!api/|assets/|src/|shared/|@vite/|@react-refresh|node_modules/|@fs/|favicon\\.png|og-image\\.jpg|site\\.webmanifest).*)",
       "destination": "/"
     }
   ]

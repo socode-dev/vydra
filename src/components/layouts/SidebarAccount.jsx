@@ -1,7 +1,7 @@
 import clsx from "clsx";
 import { FiLogOut, FiSettings, FiShield } from "react-icons/fi";
 import useAuthStore from "../../store/useAuthStore";
-import { getDemoPath, useDemoMode } from "../../demo/useDemoMode";
+import { getCustomerPath, getDemoPath, useDemoMode } from "../../demo/useDemoMode";
 import { useMainContext } from "../../context/MainContext";
 import SidebarLink from "./SidebarLink";
 import Tooltip from "../ui/Tooltip";
@@ -26,7 +26,7 @@ const SidebarAccount = ({ collapsed, onNavigate }) => {
       )}
     >
       <SidebarLink
-        to={demo ? getDemoPath("/settings") : "/settings"}
+        to={demo ? getDemoPath("/settings") : getCustomerPath("/settings")}
         label="Settings"
         icon={FiSettings}
         collapsed={collapsed}

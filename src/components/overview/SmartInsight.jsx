@@ -4,7 +4,7 @@ import { FiZap } from "react-icons/fi";
 import InsightCard from "../insights/InsightCard";
 import useInsightsStore from "../../store/useInsightsStore";
 import { normalizeInsight } from "../../utils/normalizeInsight";
-import { getDemoPath, useDemoMode } from "../../demo/useDemoMode";
+import { getCustomerPath, getDemoPath, useDemoMode } from "../../demo/useDemoMode";
 import Button from "../ui/Button";
 
 const severityRank = {
@@ -45,7 +45,7 @@ const SmartInsight = () => {
         </div>
         <Button
           as={Link}
-          to={isDemoMode ? getDemoPath("/insights") : "/insights"}
+          to={isDemoMode ? getDemoPath("/insights") : getCustomerPath("/insights")}
           variant="ghost"
           className="shrink-0 px-2 text-[13px]"
         >

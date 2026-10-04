@@ -18,10 +18,12 @@ const pageTitles = {
   "/settings": "Settings",
 };
 
-const Header = ({ collapsed, onToggleSidebar }) => {
+const Header = () => {
   const { pathname } = useLocation();
   const isDemoMode = useDemoMode();
-  const path = isDemoMode ? pathname.replace(/^\/demo/, "") || "/" : pathname;
+  const path = isDemoMode
+    ? pathname.replace(/^\/demo/, "") || "/"
+    : pathname.replace(/^\/dashboard/, "") || "/";
   const { handleSidebarOpen, isSidebarOpen } = useMainContext();
 
   return (
@@ -40,13 +42,13 @@ const Header = ({ collapsed, onToggleSidebar }) => {
           </Button>
         </Tooltip>
 
-        <Tooltip
+        {/* <Tooltip
           content={collapsed ? "Expand sidebar" : "Collapse sidebar"}
           side="bottom"
         >
           <Button
             variant="outline"
-            className="hidden size-11 min-h-11 shrink-0 p-0! lg:inline-flex max-lg:hidden"
+            className="hidden size-11 max-h-11 shrink-0 p-0! lg:inline-flex max-lg:hidden"
             onClick={onToggleSidebar}
             aria-controls="app-sidebar"
             aria-expanded={!collapsed}
@@ -54,7 +56,7 @@ const Header = ({ collapsed, onToggleSidebar }) => {
           >
             {collapsed ? <LuChevronsRight size={18} aria-hidden="true" /> : <LuChevronsLeft size={18} aria-hidden="true" />}
           </Button>
-        </Tooltip>
+        </Tooltip> */}
 
         <div className="min-w-0 leading-tight">
           <p className="hidden text-xs text-muted-foreground sm:block">

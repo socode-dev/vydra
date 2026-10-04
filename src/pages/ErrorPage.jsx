@@ -17,7 +17,7 @@ const ErrorPage = () => {
   }
 
   const isAuthenticated = Boolean(user && !isDemoUser(user));
-  const destination = isAuthenticated ? "/" : "/";
+  const destination = isAuthenticated ? "/dashboard" : "/";
   const buttonLabel = isAuthenticated ? "Go to dashboard" : "Go home";
   const Icon = isAuthenticated ? FiCompass : FiHome;
 

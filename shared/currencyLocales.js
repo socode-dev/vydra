@@ -1,5 +1,5 @@
 // List of currency codes and their locales
-export const CURRENCY_SYMBOLS = {
+export const CURRENCY_LOCALES = {
   USD: "en-US", // US Dollar
   EUR: "en-US", // Euro
   GBP: "en-GB", // British Pound

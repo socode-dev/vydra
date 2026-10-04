@@ -3,7 +3,7 @@ import clsx from "clsx";
 import { useMainContext } from "../../context/MainContext";
 import SidebarContent from "./SidebarContent";
 
-const Sidebar = ({ collapsed }) => {
+const Sidebar = ({ collapsed, onToggleSidebar }) => {
   const { isSidebarOpen, handleSidebarClose } = useMainContext();
   const drawerRef = useRef(null);
 
@@ -22,7 +22,7 @@ const Sidebar = ({ collapsed }) => {
           collapsed ? "w-18" : "w-64",
         )}
       >
-        <SidebarContent collapsed={collapsed} />
+        <SidebarContent collapsed={collapsed} onToggleSidebar={onToggleSidebar} />
       </aside>
 
       <dialog

@@ -2,7 +2,7 @@ import { createContext, useContext, useMemo } from "react";
 import useTransactionStore from "../store/useTransactionStore";
 import { eachMonthOfInterval, format } from "date-fns";
 import { useOverviewContext } from "./OverviewContext";
-import { formatAmount } from "../utils/formatAmount";
+import { formatAmount, compactAmount } from "../utils/formatAmount";
 import useCurrencyStore from "../store/useCurrencyStore";
 import useThemeStore from "../store/useThemeStore";
 
@@ -72,12 +72,7 @@ export const OverviewChartProvider = ({ children }) => {
     (max, month) => Math.max(max, month.income, month.expense),
     0,
   );
-  const compactCurrency = new Intl.NumberFormat(undefined, {
-    style: "currency",
-    currency: selectedCurrency,
-    notation: "compact",
-    maximumFractionDigits: 1,
-  });
+
   const areaFill =
     (color, fallback) =>
     ({ chart }) => {
@@ -192,7 +187,7 @@ export const OverviewChartProvider = ({ children }) => {
         },
         ticks: {
           maxTicksLimit: 5,
-          callback: (value) => compactCurrency.format(value),
+          callback: (amount) => compactAmount(amount, selectedCurrency),
           color: textColor,
           font: {
             size: 11,

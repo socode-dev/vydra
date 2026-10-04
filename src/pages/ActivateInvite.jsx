@@ -98,7 +98,7 @@ const ActivateInvite = () => {
             Your invitation has been accepted successfully.
           </p>
         </div>
-        <Button as={Link} to="/" className="w-full">
+        <Button as={Link} to="/dashboard" className="w-full">
           Continue
         </Button>
       </AuthFormShell>

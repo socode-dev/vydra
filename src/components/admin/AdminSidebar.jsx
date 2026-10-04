@@ -9,8 +9,8 @@ import {
   FiUsers,
   FiX,
 } from "react-icons/fi";
-import { LuBrain } from "react-icons/lu";
-import { HiOutlineDocumentSearch } from "react-icons/hi"
+import { LuChevronsLeft, LuChevronsRight, LuBrain } from "react-icons/lu";
+import { HiOutlineDocumentSearch } from "react-icons/hi";
 import VydraLogo from "../ui/VydraLogo";
 import Button from "../ui/Button";
 import Tooltip from "../ui/Tooltip";
@@ -23,7 +23,7 @@ const links = [
   { to: "/admin/investigation", label: "Investigation", icon: HiOutlineDocumentSearch },
 ];
 
-const AdminSidebar = ({ collapsed = false, mobile = false, onClose }) => (
+const AdminSidebar = ({ collapsed = false, mobile = false, onClose, onToggleSidebar }) => (
   <aside
     className={clsx(
       "flex h-full min-h-0 w-full flex-col border-r border-sidebar-border bg-sidebar",
@@ -32,7 +32,7 @@ const AdminSidebar = ({ collapsed = false, mobile = false, onClose }) => (
   >
     <div className={clsx(
       "flex min-h-20 items-center gap-3 border-b border-sidebar-border py-2",
-      collapsed ? "justify-center px-2" : "px-5",
+      collapsed ? "flex-col justify-center px-2" : "justify-between px-5",
     )}>
       <Tooltip content="Vydra Admin" side="right" disabled={!collapsed}>
         <NavLink
@@ -49,6 +49,21 @@ const AdminSidebar = ({ collapsed = false, mobile = false, onClose }) => (
             </div>
           )}
         </NavLink>
+      </Tooltip>
+
+      <Tooltip
+        content={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+        side={collapsed ? "right" : "bottom"}
+      >
+        <button
+          className="w-fit mx-auto p-2 rounded-lg hover:bg-secondary cursor-pointer transition"
+          onClick={onToggleSidebar}
+          aria-controls="app-sidebar"
+          aria-expanded={!collapsed}
+          aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+        >
+          {collapsed ? <LuChevronsRight size={18} aria-hidden="true" /> : <LuChevronsLeft size={18} aria-hidden="true" />}
+        </button>
       </Tooltip>
 
       {mobile && (
@@ -108,7 +123,7 @@ const AdminSidebar = ({ collapsed = false, mobile = false, onClose }) => (
     <div className={clsx("border-t border-sidebar-border py-3", collapsed ? "px-2" : "px-3")}>
       <Tooltip content="Customer dashboard" side="right" disabled={!collapsed}>
         <NavLink
-          to="/"
+          to="/dashboard"
           end
           onClick={onClose}
           className={clsx(

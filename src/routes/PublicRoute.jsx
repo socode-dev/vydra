@@ -21,8 +21,8 @@ const PublicRoute = ({ children }) => {
     return <AuthLoadingScreen />;
   }
 
-  if (!loading && !submitting && userLoggedIn && !isDemoUser(user)) {
-    return <Navigate to="/" replace />;
+  if (!loading && userLoggedIn && !isDemoUser(user)) {
+    return <Navigate to="/dashboard" replace />;
   }
 
   return children;

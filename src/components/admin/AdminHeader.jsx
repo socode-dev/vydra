@@ -1,6 +1,5 @@
 import { useLocation } from "react-router-dom";
 import { FiLogOut, FiSidebar } from "react-icons/fi";
-import { LuChevronsLeft, LuChevronsRight } from "react-icons/lu"
 import Button from "../ui/Button";
 import Tooltip from "../ui/Tooltip";
 import useAuthStore from "../../store/useAuthStore";
@@ -14,7 +13,7 @@ const pageTitles = {
   "/admin/investigation": "Investigation",
 };
 
-const AdminHeader = ({ onMenuOpen, collapsed, onToggleSidebar }) => {
+const AdminHeader = ({ onMenuOpen }) => {
   const { pathname } = useLocation();
   const user = useAuthStore((state) => state.currentUser);
   const userName = useAuthStore((state) => state.userName);
@@ -34,18 +33,6 @@ const AdminHeader = ({ onMenuOpen, collapsed, onToggleSidebar }) => {
           </Button>
         </Tooltip>
 
-        <Tooltip content={collapsed ? "Expand sidebar" : "Collapse sidebar"} side="bottom">
-          <Button
-            variant="outline"
-            className="hidden size-11 min-h-5 shrink-0 p-0! lg:inline-flex max-lg:hidden"
-            onClick={onToggleSidebar}
-            aria-controls="admin-sidebar"
-            aria-expanded={!collapsed}
-            aria-label={collapsed ? "Expand admin sidebar" : "Collapse admin sidebar"}
-          >
-            {collapsed ? <LuChevronsRight size={18} aria-hidden="true" /> : <LuChevronsLeft size={18} aria-hidden="true" />}
-          </Button>
-        </Tooltip>
         <div className="min-w-0">
           <p className="hidden text-xs text-muted-foreground sm:block">Vydra Admin</p>
           <h1 className="truncate font-display text-base font-semibold">
