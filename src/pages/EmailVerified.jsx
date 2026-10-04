@@ -57,7 +57,7 @@ const EmailVerified = () => {
               : "Your email has been verified successfully."}
           </p>
         </div>
-        <Button as={Link} to="/" className="w-full">
+        <Button as={Link} to="/dashboard" className="w-full">
           Back to Dashboard
         </Button>
       </AuthFormShell>
@@ -106,7 +106,7 @@ const EmailVerified = () => {
           Check verification
         </span>
       </Button>
-      <Button as={Link} to="/" variant="ghost" className="mt-3 w-full">
+      <Button as={Link} to="/dashboard" variant="ghost" className="mt-3 w-full">
         Back to Dashboard
       </Button>
     </AuthFormShell>

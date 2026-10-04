@@ -1,6 +1,6 @@
 import { useContext, createContext, useMemo } from "react";
 import { useReportContext } from "./ReportContext";
-import { formatAmount } from "../utils/formatAmount";
+import { formatAmount, compactAmount } from "../utils/formatAmount";
 import useCurrencyStore from "../store/useCurrencyStore";
 import useThemeStore from "../store/useThemeStore";
 
@@ -105,13 +105,7 @@ export const ReportChartProvider = ({ children }) => {
           maxTicksLimit: 6,
           color: textColor,
           font: { family: "DM Sans", size: 11 },
-          callback: (value) =>
-            new Intl.NumberFormat(undefined, {
-              style: "currency",
-              currency: selectedCurrency,
-              notation: "compact",
-              maximumFractionDigits: 1,
-            }).format(Number(value)),
+          callback: (amount) => compactAmount(amount, selectedCurrency),
         },
       },
     },

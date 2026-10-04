@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
 import { useAuthFormContext } from "../context/AuthFormContext";
 import useThresholdForm from "../hooks/useThresholdForm";
 import { getThresholdsValue } from "../utils/getValues";
@@ -129,15 +128,6 @@ const Signup = () => {
             Create Account
           </Button>
         </fieldset>
-        <Button
-          as={Link}
-          to="/demo"
-          variant="outline"
-          className="mt-3 w-full"
-          disabled={busy}
-        >
-          Explore Demo
-        </Button>
       </form>
       <SocialAuthButtons
         verb="sign up"

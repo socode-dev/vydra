@@ -15,6 +15,7 @@ import CurrencyDropdown from "./CurrencyDropdown";
 import { useOverviewContext } from "../../context/OverviewContext";
 import {
   getDemoPath,
+  getCustomerPath,
   showDemoReadOnlyToast,
   useDemoMode,
 } from "../../demo/useDemoMode";
@@ -114,7 +115,7 @@ const SettingsDropdown = () => {
           type="button"
           onClick={() => {
             handleSettingsToggle();
-            navigate(isDemoMode ? getDemoPath("/settings") : "/settings");
+            navigate(isDemoMode ? getDemoPath("/settings") : getCustomerPath("/settings"));
           }}
           className={clsx(
             "flex min-h-11 w-full items-center justify-between gap-3 rounded-md px-3 py-2.5 text-left [&:is(button)]:cursor-pointer",

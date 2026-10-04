@@ -7,7 +7,7 @@ import useTransactionStore from "../../store/useTransactionStore";
 import useCurrencyStore from "../../store/useCurrencyStore";
 import useThresholdStore from "../../store/useThresholdStore";
 import { getAmountSpent } from "../../utils/getAmountSpent";
-import { getDemoPath, useDemoMode } from "../../demo/useDemoMode";
+import { getCustomerPath, getDemoPath, useDemoMode } from "../../demo/useDemoMode";
 import Button from "../ui/Button";
 
 const ExpenseBudgetProgress = () => {
@@ -16,7 +16,7 @@ const ExpenseBudgetProgress = () => {
   const currency = useCurrencyStore((state) => state.selectedCurrency);
   const warningThreshold = useThresholdStore( state => state.thresholds?.budgetThreshold80 ?? 80);
   const isDemoMode = useDemoMode();
-  const budgetsPath = isDemoMode ? getDemoPath("/budgets") : "/budgets";
+  const budgetsPath = isDemoMode ? getDemoPath("/budgets") : getCustomerPath("/budgets");
 
   const expenseBudgets = useMemo(
     () =>

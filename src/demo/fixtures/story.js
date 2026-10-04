@@ -34,7 +34,10 @@ const monthLabel = (date) =>
   new Intl.DateTimeFormat("en-NG", { month: "long" }).format(date);
 
 const formatDemoAmount = (amount) =>
-  `${DEMO_CURRENCY_SYMBOL}${Number(amount).toLocaleString("en-NG")}`;
+  `${DEMO_CURRENCY_SYMBOL}${Number(amount).toLocaleString("en-NG", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })}`;
 
 const sum = (items) => items.reduce((total, item) => total + Number(item.amount), 0);
 
@@ -60,7 +63,7 @@ const monthlyPatterns = [
   { income: 450000, bonus: 75000, food: 75000, transportation: 34000, utilities: 27000, rent: 120000, healthcare: 20000, shopping: 28000, entertainment: 22000 },
   { income: 430000, food: 80000, transportation: 38000, utilities: 31000, rent: 120000, healthcare: 24000, shopping: 45000, entertainment: 25000 },
   { income: 420000, food: 85000, transportation: 40000, utilities: 33000, rent: 120000, healthcare: 25000, shopping: 38000, entertainment: 28000 },
-  { income: 450000, food: 135000, transportation: 42000, utilities: 35000, rent: 120000, healthcare: 26000, shopping: 42000, entertainment: 28000 },
+  { income: 450000, food: 202007.3, transportation: 42000, utilities: 35000, rent: 120000, healthcare: 26000, shopping: 42000, entertainment: 28000 },
 ];
 
 const makeTransaction = ({ id, name, description, category, categoryKey, type, amount, date }) => ({
@@ -125,7 +128,7 @@ const buildBudgets = (referenceDate) => {
   const date = monthStart(referenceDate);
   const definitions = [
     ["Monthly Income", "Salary", "txn:salary", "income", 600000],
-    ["Food", "Food", "txn:food", "expense", 130000],
+    ["Food", "Food", "txn:food", "expense", 200000],
     ["Transportation", "Transportation", "txn:transportation", "expense", 160000],
     ["Utilities", "Utilities", "txn:utilities", "expense", 140000],
     ["Rent", "Rent", "txn:rent", "expense", 500000],
@@ -208,6 +211,8 @@ const buildInsights = (referenceDate, transactions, budgets) => {
   const foodBaseline = median(historicalFood);
   const foodDeviation = Math.round(((currentFood - foodBaseline) / foodBaseline) * 100);
   const foodBudget = budgets.find((budget) => budget.categoryKey === "txn:food");
+  const weeklyFoodBudget = foodBaseline / 4;
+  const dailyFoodLimit = foodBudget.amount / 101.8333333333;
   const currentIncome = sum(transactions.filter((transaction) => transaction.type === "income" && transaction.date.startsWith(latestMonth)));
   const currentSpending = sum(transactions.filter((transaction) => transaction.type === "expense" && transaction.date.startsWith(latestMonth)));
   const spendingPercent = Math.round((currentSpending / currentIncome) * 100);
@@ -233,8 +238,8 @@ const buildInsights = (referenceDate, transactions, budgets) => {
       createdAt: created(6),
       expiresAt: expiresAfterTtl(created(6)),
       agent: {
-        explanation: `${label} food spending reached ${formatDemoAmount(currentFood)}, ${foodDeviation}% above Amina's five-month median of ${formatDemoAmount(foodBaseline)}. This is a meaningful change worth reviewing in context.`,
-        suggestion: "Review the largest food purchases and decide whether the increase is temporary or should change the monthly plan.",
+        explanation: `Your food spending in October was ${formatDemoAmount(currentFood)}, which is a huge jump from your usual ${formatDemoAmount(foodBaseline)} and the highest in recent months. This level of spending will definitely affect your overall budget.`,
+        suggestion: `Set a strict budget of ${formatDemoAmount(weeklyFoodBudget)} weekly for food in November to keep your total around ${formatDemoAmount(foodBaseline)} for the month.`,
       },
       modelUsed: "Demo Rule Engine",
     },
@@ -257,8 +262,8 @@ const buildInsights = (referenceDate, transactions, budgets) => {
       createdAt: created(8),
       expiresAt: expiresAfterTtl(created(8)),
       agent: {
-        explanation: `${label} food spending is ${formatDemoAmount(currentFood)}, exceeding its ${formatDemoAmount(foodBudget.amount)} limit by ${formatDemoAmount(currentFood - foodBudget.amount)} while most other category budgets remain within their configured limits.`,
-        suggestion: "Check whether the additional food spending reflects household needs, a one-time purchase, or a budget that needs revisiting.",
+        explanation: `You set a ${formatDemoAmount(foodBudget.amount)} food budget for October. You have spent ${formatDemoAmount(currentFood)}, which is ${Math.round((currentFood / foodBudget.amount) * 100)}% of your budget with 28 days remaining. At your current pace, you will spend more than planned, which may negatively affect your financial stability.`,
+        suggestion: `Limit your food spending to about ${formatDemoAmount(dailyFoodLimit)} per day for the rest of the month to reduce further overspending.`,
       },
       modelUsed: "Demo Rule Engine",
     },

@@ -12,7 +12,6 @@ export const fallback = ({complianceData}) => {
 
     const budgetAmount = formatAmount({amount: budget.amount, currency});
     const spent = formatAmount({amount: spending.total_spent, currency});
-    const projected = formatAmount({amount: derived.projected_total, currency});
     const safeDaily = formatAmount({amount: derived.safe_daily_spend, currency});
 
     let explanation = "";
@@ -30,7 +29,15 @@ export const fallback = ({complianceData}) => {
     return buildBudgetInsight(category, budget.month, budget.year, derived.risk_level, explanation, suggestion);
     }
 
-    explanation = `You set a ${budgetAmount} ${category.toLowerCase()} budget for ${budget.month}. You have spent ${spent}, which is ${derived.percent_budget_used}% of your budget with ${time.days_remaining} days left. Your total spending is projected to reach ${projected} by month end.`;
+    explanation = `You set a ${budgetAmount} ${category.toLowerCase()} budget for ${budget.month}. You have spent ${spent}, which is ${derived.percent_budget_used}% of your budget with ${time.days_remaining} days left.`;
+
+    if (derived.compliance_status === "EXCEEDED") {
+      explanation += " At your current pace, you will spend more than planned, which may negatively affect your financial stability.";
+    } else if (derived.compliance_status === "AT_RISK") {
+      explanation += " Your spending is moving faster than planned and needs attention for the rest of the month.";
+    } else if (derived.compliance_status === "BORDERLINE") {
+      explanation += " Your spending is close to the planned limit and needs attention for the rest of the month.";
+    }
 
     switch (derived.compliance_status) {
       case "EXCEEDED":

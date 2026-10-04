@@ -11,7 +11,15 @@ import {
   doSignUserWithEmailAndPassword,
   doSignInWithMicrosoft,
 } from "../firebase/auth";
-import { doc, setDoc, getDoc, serverTimestamp } from "firebase/firestore";
+import {
+  deleteField,
+  doc,
+  FieldPath,
+  getDoc,
+  serverTimestamp,
+  updateDoc,
+  setDoc,
+} from "firebase/firestore";
 import { getAuthErrorMessage } from "../utils/authErrorrs";
 import {
   createWelcomeNotification,
@@ -67,6 +75,9 @@ const getUserDocWithRetry = async (uid, attempts = 3) => {
   }
 };
 
+const hasSeenOnboarding = (data) =>
+  data?.profile?.onboardingSeen === true;
+
 export const useAuthStore = create((set, get) => ({
   // state
   currentUser: null,
@@ -74,6 +85,8 @@ export const useAuthStore = create((set, get) => ({
   userName: { initials: "", fullName: "" },
   userLoggedIn: false,
   loading: true,
+  onboardingSeen: false,
+  onboardingReady: false,
   onLoginErr: null,
   onSignupErr: null,
   googleErr: null,
@@ -97,13 +110,33 @@ export const useAuthStore = create((set, get) => ({
   setOpenResetSuccessfulModal: (value) =>
     set({ openResetSuccessfulModal: value }),
 
+  setOnboardingSeen: async (seen, userId = get().currentUser?.uid) => {
+    if (!userId) return { ok: false };
+
+    try {
+      await updateDoc(
+        doc(db, "users", userId),
+        new FieldPath("profile", "onboardingSeen"),
+        Boolean(seen),
+        new FieldPath("profile.onboardingSeen"),
+        deleteField(),
+      );
+
+      set({ onboardingSeen: Boolean(seen), onboardingReady: true });
+      return { ok: true };
+    } catch (err) {
+      console.error("Unable to persist onboarding state", err);
+      return { ok: false };
+    }
+  },
+
   // start the firebase auth listener (call once during app init)
   startAuthListener: () => {
     // avoid subscribing twice
     if (get()._authUnsubscribe) return;
 
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      set({ loading: true });
+      set({ loading: true, onboardingReady: false });
 
       if (user) {
         try {
@@ -117,6 +150,8 @@ export const useAuthStore = create((set, get) => ({
             userName: formatUserName(profile),
             userLoggedIn: true,
             isUserEmailVerified: user.emailVerified,
+            onboardingSeen: hasSeenOnboarding(data),
+            onboardingReady: true,
           });
         } catch (err) {
           console.error(err);
@@ -125,6 +160,8 @@ export const useAuthStore = create((set, get) => ({
             userName: emptyUserName,
             userLoggedIn: true,
             isUserEmailVerified: user.emailVerified,
+            onboardingSeen: false,
+            onboardingReady: false,
           });
         }
       } else {
@@ -140,6 +177,8 @@ export const useAuthStore = create((set, get) => ({
           currentUser: null,
           userLoggedIn: false,
           userName: emptyUserName,
+          onboardingSeen: false,
+          onboardingReady: false,
         });
 
         storageItems.forEach((item) => localStorage.removeItem(item));
@@ -186,6 +225,8 @@ export const useAuthStore = create((set, get) => ({
           userName: formatUserName(profile),
           userLoggedIn: true,
           isUserEmailVerified: user.emailVerified,
+          onboardingSeen: hasSeenOnboarding(docData),
+          onboardingReady: true,
           loading: false,
         });
 

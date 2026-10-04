@@ -99,15 +99,6 @@ const Login = () => {
             Sign In
           </Button>
         </fieldset>
-        <Button
-          as={Link}
-          to="/demo"
-          variant="outline"
-          className="mt-3 w-full"
-          disabled={busy}
-        >
-          Explore Demo
-        </Button>
       </form>
       <SocialAuthButtons
         disabled={isSubmitting}

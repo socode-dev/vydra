@@ -1,9 +1,9 @@
 import { NavLink } from "react-router-dom";
 import { FiCreditCard, FiTarget, FiPieChart, FiX } from "react-icons/fi";
-import { LuLightbulb, LuGauge, LuListTree } from "react-icons/lu";
+import { LuLightbulb, LuGauge, LuListTree, LuChevronsRight, LuChevronsLeft } from "react-icons/lu";
 import clsx from "clsx";
 import { useMainContext } from "../../context/MainContext";
-import { getDemoPath, useDemoMode } from "../../demo/useDemoMode";
+import { getCustomerPath, getDemoPath, useDemoMode } from "../../demo/useDemoMode";
 import Button from "../ui/Button";
 import SidebarLink from "./SidebarLink";
 import SidebarAccount from "./SidebarAccount";
@@ -19,7 +19,7 @@ const links = [
   { to: "/reports", label: "Reports", icon: FiPieChart },
 ];
 
-const SidebarContent = ({ collapsed = false, mobile = false }) => {
+const SidebarContent = ({ collapsed = false, mobile = false, onToggleSidebar }) => {
   const demo = useDemoMode();
   const { handleSidebarClose } = useMainContext();
   
@@ -32,13 +32,13 @@ const SidebarContent = ({ collapsed = false, mobile = false }) => {
     <div className="flex h-full min-h-0 flex-col bg-sidebar">
       <div
         className={clsx(
-          "flex min-h-20 items-center gap-2 py-2",
-          collapsed ? "justify-center px-2" : "px-5",
+          "flex min-h-20 items-center gap-3 border-b border-sidebar-border py-2",
+          collapsed ? "flex-col justify-center px-2" : "justify-between px-5",
         )}
       >
         <Tooltip content="Vydra" side="right" disabled={!collapsed}>
           <NavLink
-            to={demo ? getDemoPath("/") : "/"}
+            to={demo ? getDemoPath("/") : getCustomerPath("/")}
             onClick={close}
             aria-label="Vydra overview"
             className="flex min-w-0 items-center gap-0.5 focus-visible:outline-2 focus-visible:outline-ring"
@@ -55,6 +55,21 @@ const SidebarContent = ({ collapsed = false, mobile = false }) => {
               </div>
             )}
           </NavLink>
+        </Tooltip>
+
+        <Tooltip
+          content={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+          side={collapsed ? "right" : "bottom"}
+        >
+          <button
+            className="w-fit mx-auto p-2 rounded-lg hover:bg-secondary cursor-pointer transition"
+            onClick={onToggleSidebar}
+            aria-controls="app-sidebar"
+            aria-expanded={!collapsed}
+            aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+          >
+            {collapsed ? <LuChevronsRight size={18} aria-hidden="true" /> : <LuChevronsLeft size={18} aria-hidden="true" />}
+          </button>
         </Tooltip>
 
         {mobile && (
@@ -82,7 +97,7 @@ const SidebarContent = ({ collapsed = false, mobile = false }) => {
           <SidebarLink
             key={link.to}
             {...link}
-            to={demo ? getDemoPath(link.to) : link.to}
+            to={demo ? getDemoPath(link.to) : getCustomerPath(link.to)}
             collapsed={collapsed}
             onClick={close}
           />

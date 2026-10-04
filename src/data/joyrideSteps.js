@@ -6,43 +6,23 @@ const step = (target, content) => ({
 
 export const overviewSteps = [
   step(
-    "#notifications",
-    "Notifications surface important account, budget, goal, and insight updates.",
+    "#financial-summary",
+    "Start with a quick view of your income, expenses, net balance, and budget usage.",
   ),
   step(
-    "#settings",
-    "Use settings to adjust your theme, currency, alert thresholds, and exports.",
-  ),
-  step(
-    "#total-income",
-    "Total Income summarizes the money received in your current financial activity.",
-  ),
-  step(
-    "#total-expenses",
-    "Total Expenses shows your spending so you can quickly identify pressure on cash flow.",
-  ),
-  step(
-    "#net-balance",
-    "Net Balance compares income with expenses and shows whether you are ahead or behind.",
-  ),
-  step(
-    "#budget-usage",
-    "Budget Usage tracks how much of your planned spending has already been used.",
-  ),
-  step(
-    "#financial-charts",
-    "Financial Overview visualizes income, expenses, and budget movement over time.",
-  ),
-  step(
-    "#smart-insights",
-    "Smart Insights highlights the most important financial signals available to you.",
+    "#financial-overview",
+    "See how your income, spending, and budget activity are developing over time.",
   ),
   step(
     "#budget-overview",
-    "Budget Overview breaks down income and expense budget progress.",
+    "Review your budget usage and see which categories need attention.",
+  ),
+  step(
+    "#smart-insights",
+    "Vydra surfaces financial conditions and patterns that may deserve your attention, with context to help you understand what they mean.",
   ),
   step(
     "#quick-actions",
-    "Quick Actions provides fast access to entries, budgets, goals, and exports.",
+    "Use Quick Actions when you want to add an entry, set a budget or goal, or export your financial log.",
   ),
 ];
