@@ -4,7 +4,7 @@ import reportsLight from "../../assets/marketing/reports-light.png";
 import { MotionReveal } from "./Motion";
 
 const Product = () => (
-  <section id="product" className="scroll-mt-24 border-t border-border/70 px-5 py-6 sm:px-8 sm:py-10 lg:px-10 lg:py-18">
+  <section id="product" className="scroll-mt-24 border-t border-border/70 px-5 py-10 sm:px-8 lg:px-10 lg:py-18">
     <div className="mx-auto grid max-w-7xl gap-12 lg:grid-cols-[minmax(0,0.72fr)_minmax(0,1.28fr)] lg:items-center lg:gap-20">
       <MotionReveal className="max-w-xl">
         <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary sm:text-sm">The product</p>

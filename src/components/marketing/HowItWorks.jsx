@@ -5,7 +5,7 @@ import { fadeUpVariants } from "./marketingMotionConfig";
 const flow = ["Financial activity", "Signals", "Context", "Understanding"];
 
 const HowItWorks = () => (
-  <section id="how-it-works" className="scroll-mt-24 border-t border-border/70 px-5 py-6 sm:px-8 sm:py-10 lg:px-10 lg:py-18">
+  <section id="how-it-works" className="scroll-mt-24 border-t border-border/70 px-5 py-10 sm:px-8 lg:px-10 lg:py-18">
     <div className="mx-auto grid max-w-7xl gap-12 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] lg:items-end lg:gap-20">
       <MotionReveal>
         <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary sm:text-sm">How Vydra works</p>

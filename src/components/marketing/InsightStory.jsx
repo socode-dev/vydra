@@ -16,7 +16,7 @@ const story = [
 ];
 
 const InsightStory = () => (
-  <section id="activity-story" className="scroll-mt-24 border-t border-border/70 px-5 py-6 sm:px-8 sm:py-10 lg:px-10 lg:py-18">
+  <section id="activity-story" className="scroll-mt-24 border-t border-border/70 px-5 py-10 sm:px-8 lg:px-10 lg:py-18">
     <div className="mx-auto max-w-7xl">
       <div className="max-w-2xl">
         <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary sm:text-sm">The Vydra loop</p>
