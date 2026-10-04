@@ -19,7 +19,7 @@ const Hero = () => {
   };
 
   return (
-    <section className="marketing-hero relative overflow-hidden px-5 pb-6 pt-10 sm:px-8 sm:pb-14 sm:pt-18 lg:px-10 lg:pb-22 lg:pt-26">
+    <section className="marketing-hero relative overflow-hidden px-5 pb-14 pt-10 sm:px-8 sm:pt-18 lg:px-10 lg:pb-22 lg:pt-26">
     <div className="marketing-hero-glow pointer-events-none absolute left-1/2 top-0 h-96 w-[min(60rem,100vw)] -translate-x-1/2 opacity-70" aria-hidden="true" />
     <div className="relative mx-auto max-w-7xl">
       <motion.div

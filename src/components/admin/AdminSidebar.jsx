@@ -56,7 +56,7 @@ const AdminSidebar = ({ collapsed = false, mobile = false, onClose, onToggleSide
         side={collapsed ? "right" : "bottom"}
       >
         <button
-          className="w-fit mx-auto p-2 rounded-lg hover:bg-secondary cursor-pointer transition"
+          className="w-fit mx-auto p-2 rounded-lg hover:bg-secondary cursor-pointer transition max-lg:hidden"
           onClick={onToggleSidebar}
           aria-controls="app-sidebar"
           aria-expanded={!collapsed}
