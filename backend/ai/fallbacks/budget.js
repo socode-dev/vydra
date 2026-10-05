@@ -1,70 +1,50 @@
 import { formatAmount } from "../shared/formatAmount.js";
 
-export const fallback = ({complianceData}) => {
-    const { category, budget, spending, time, derived } = complianceData;
+export const fallback = ({ complianceData }) => {
+  const { category, budget, spending, time, derived } = complianceData;
 
-    if(!category || !budget || !spending || !time || !derived) {
-      throw new Error("Budget complianceData not complete");
-    };
-    
-    const currency = budget.currency;
-    const isCurrentMonth = time.is_current_month;
+  if (!category || !budget || !spending || !time || !derived) {
+    throw new Error("Budget complianceData not complete");
+  }
 
-    const budgetAmount = formatAmount({amount: budget.amount, currency});
-    const spent = formatAmount({amount: spending.total_spent, currency});
-    const safeDaily = formatAmount({amount: derived.safe_daily_spend, currency});
+  const currency = budget.currency;
+  const budgetAmount = formatAmount({ amount: budget.amount, currency });
+  const spent = formatAmount({ amount: spending.total_spent, currency });
+  const remainingBudget = formatAmount({ amount: derived.remaining_budget, currency });
+  const amountOverBudget = formatAmount({ amount: derived.amount_over_budget, currency });
+  const categoryName = category.toLowerCase();
 
-    let explanation = "";
-    let suggestion = "";
+  let explanation;
+  let suggestion;
 
-    if (!isCurrentMonth) {
-    explanation = `You set a ${budgetAmount} ${category.toLowerCase()} budget for ${budget.month}. You spent ${spent}, which is ${derived.percent_budget_used}% of your budget by the end of the month.`;
+  if (!time.is_current_month) {
+    explanation = `Your ${budget.month} ${categoryName} budget was ${budgetAmount}. You spent ${spent}, which was ${derived.percent_budget_used}% of the budget and ${amountOverBudget} over the planned amount.`;
+    suggestion = `Review the ${categoryName} purchases from ${budget.month} and adjust the next budget period if the current amount no longer reflects your needs.`;
+  } else if (derived.compliance_status === "EXCEEDED") {
+    explanation = `Your ${categoryName} budget for ${budget.month} is ${budgetAmount}, and you have spent ${spent}, or ${derived.percent_budget_used}% of the budget. You are ${amountOverBudget} over budget with ${time.days_remaining} days remaining, so further ${categoryName} spending increases the amount beyond the plan.`;
+    suggestion = `Before another ${categoryName} purchase, review the spending that caused the excess and prioritize necessary expenses for the rest of the month.`;
+  } else {
+    explanation = `You have spent ${spent} of your ${budgetAmount} ${categoryName} budget, or ${derived.percent_budget_used}%, leaving ${remainingBudget} for ${time.days_remaining} days. That remaining amount now has to cover ${categoryName} expenses for the rest of the month.`;
+    suggestion = `Before another ${categoryName} purchase, check the remaining ${remainingBudget} and prioritize necessary expenses so it can cover as much of the month as possible.`;
+  }
 
-    if (derived.percent_budget_used > 100) {
-    suggestion = `You overspent your budget. Consider adjusting your budget or reducing non-essential ${category.toLowerCase()} expenses next month.`;
-    } else {
-    suggestion = `You stayed within your budget. Maintain this spending pattern next month to stay consistent.`;
-    }
+  return buildBudgetInsight({
+    category,
+    month: budget.month,
+    year: budget.year,
+    riskLevel: derived.risk_level,
+    explanation,
+    suggestion,
+  });
+};
 
-    return buildBudgetInsight(category, budget.month, budget.year, derived.risk_level, explanation, suggestion);
-    }
-
-    explanation = `You set a ${budgetAmount} ${category.toLowerCase()} budget for ${budget.month}. You have spent ${spent}, which is ${derived.percent_budget_used}% of your budget with ${time.days_remaining} days left.`;
-
-    if (derived.compliance_status === "EXCEEDED") {
-      explanation += " At your current pace, you will spend more than planned, which may negatively affect your financial stability.";
-    } else if (derived.compliance_status === "AT_RISK") {
-      explanation += " Your spending is moving faster than planned and needs attention for the rest of the month.";
-    } else if (derived.compliance_status === "BORDERLINE") {
-      explanation += " Your spending is close to the planned limit and needs attention for the rest of the month.";
-    }
-
-    switch (derived.compliance_status) {
-      case "EXCEEDED":
-        suggestion = `Limit your ${category.toLowerCase()} spending to essentials only for the remaining ${time.days_remaining} days to reduce further overspending.`;
-        break;
-      case "AT_RISK":
-        suggestion = `Reduce your ${category.toLowerCase()} spending and aim to stay around ${safeDaily} per day for the rest of the month.`;
-        break;
-      case "BORDERLINE":
-        suggestion = `Keep your ${category.toLowerCase()} spending controlled and stay close to ${safeDaily} per day to remain within budget.`;
-        break;
-      default:
-        suggestion = `You are on track. Continue keeping your ${category.toLowerCase()} spending within ${safeDaily} per day.`;
-    }
-
-    return buildBudgetInsight(category, budget.month, budget.year, derived.risk_level, explanation, suggestion)
-}
-
-const buildBudgetInsight = (category, month, year, riskLevel, explanation, suggestion) => {
-  return {
-        id: `budget_${Math.random().toString(36).slice(2)}`,
-      type: "budget-compliance",
-      actionType: "suggestion",
-      severity: riskLevel,
-      category,
-      month,
-      year,
-      agent: { explanation, suggestion }
-    }
-}
+const buildBudgetInsight = ({ category, month, year, riskLevel, explanation, suggestion }) => ({
+  id: `budget_${Math.random().toString(36).slice(2)}`,
+  type: "budget-compliance",
+  actionType: "suggestion",
+  severity: riskLevel,
+  category,
+  month,
+  year,
+  agent: { explanation, suggestion },
+});

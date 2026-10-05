@@ -13,7 +13,7 @@ export const runFinancialSignals = ({
     const budgetComplianceList = transactions.length && budgets.length
         ? budgets
             .map(budget => buildBudgetComplianceData({ budget, transactions, currency }))
-            .filter(item => item?.derived?.compliance_status !== "ON_TRACK")
+            .filter(Boolean)
         : [];
 
     const cashflowData = transactions.length ? buildCashflowData({ transactions, currency }) : null;

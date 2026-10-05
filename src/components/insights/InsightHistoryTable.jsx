@@ -79,15 +79,8 @@ const InsightHistoryTable = ({ histories = [] }) => {
     setPage(1);
   };
 
-  const explanation = (history) => {
-    const message = getInsightExplanation(history);
-
-    return (
-      <p className="line-clamp-2" title={message || undefined}>
-        {message || "No explanation recorded."}
-      </p>
-    );
-  };
+  const explanation = (history) =>
+    getInsightExplanation(history) || "No explanation recorded.";
 
   return (
     <div className="space-y-5">

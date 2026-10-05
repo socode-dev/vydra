@@ -29,13 +29,8 @@ export const buildBudgetComplianceData = ({ budget, transactions, currency }) =>
 
     const percentBudgetUsed = budget.amount > 0 ? Math.round((totalSpent / budget.amount) * 100) : 0;
 
-    const dailyBurnRate = todayDate > 0 ? totalSpent / todayDate : 0;
-
-    const projectedTotal = Math.round(dailyBurnRate * totalDaysInMonth);
-
-    const remainingBudget = budget.amount - totalSpent;
-
-    const safeDailySpend = daysRemaining > 0 ? parseFloat((remainingBudget / daysRemaining).toFixed(2)) : 0;
+    const remainingBudget = Math.max(budget.amount - totalSpent, 0);
+    const amountOverBudget = Math.max(totalSpent - budget.amount, 0);
 
     const getComplianceStatus = () => {
         if(percentBudgetUsed >= 100) return "EXCEEDED";
@@ -53,7 +48,9 @@ export const buildBudgetComplianceData = ({ budget, transactions, currency }) =>
         return "MEDIUM";
     }
 
-     return {
+    if (status === "ON_TRACK" || status === "BORDERLINE") return null;
+
+    return {
         id: `budget_${uuidv4()}`,
         category: budget.category,
         budget: {
@@ -77,11 +74,10 @@ export const buildBudgetComplianceData = ({ budget, transactions, currency }) =>
         },
         derived: {
             percent_budget_used: percentBudgetUsed,
-            daily_burn_rate: parseFloat(dailyBurnRate.toFixed(2)),
-            safe_daily_spend: safeDailySpend,
+            remaining_budget: parseFloat(remainingBudget.toFixed(2)),
+            amount_over_budget: parseFloat(amountOverBudget.toFixed(2)),
             compliance_status: status,
             risk_level: getRiskLevel(),
-            projected_total: projectedTotal
         },
-     }
+    }
 }

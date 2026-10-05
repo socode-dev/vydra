@@ -128,7 +128,7 @@ const buildBudgets = (referenceDate) => {
   const date = monthStart(referenceDate);
   const definitions = [
     ["Monthly Income", "Salary", "txn:salary", "income", 600000],
-    ["Food", "Food", "txn:food", "expense", 200000],
+    ["Food", "Food", "txn:food", "expense", 250000],
     ["Transportation", "Transportation", "txn:transportation", "expense", 160000],
     ["Utilities", "Utilities", "txn:utilities", "expense", 140000],
     ["Rent", "Rent", "txn:rent", "expense", 500000],
@@ -212,7 +212,6 @@ const buildInsights = (referenceDate, transactions, budgets) => {
   const foodDeviation = Math.round(((currentFood - foodBaseline) / foodBaseline) * 100);
   const foodBudget = budgets.find((budget) => budget.categoryKey === "txn:food");
   const weeklyFoodBudget = foodBaseline / 4;
-  const dailyFoodLimit = foodBudget.amount / 101.8333333333;
   const currentIncome = sum(transactions.filter((transaction) => transaction.type === "income" && transaction.date.startsWith(latestMonth)));
   const currentSpending = sum(transactions.filter((transaction) => transaction.type === "expense" && transaction.date.startsWith(latestMonth)));
   const spendingPercent = Math.round((currentSpending / currentIncome) * 100);
@@ -262,8 +261,8 @@ const buildInsights = (referenceDate, transactions, budgets) => {
       createdAt: created(8),
       expiresAt: expiresAfterTtl(created(8)),
       agent: {
-        explanation: `You set a ${formatDemoAmount(foodBudget.amount)} food budget for October. You have spent ${formatDemoAmount(currentFood)}, which is ${Math.round((currentFood / foodBudget.amount) * 100)}% of your budget with 28 days remaining. At your current pace, you will spend more than planned, which may negatively affect your financial stability.`,
-        suggestion: `Limit your food spending to about ${formatDemoAmount(dailyFoodLimit)} per day for the rest of the month to reduce further overspending.`,
+        explanation: `You have a budget of ${formatDemoAmount(foodBudget.amount)} for food this month, and you have spent ${formatDemoAmount(currentFood)} so far, which is ${Math.round((currentFood / foodBudget.amount) * 100)}% of your budget. There are still 26 days left in the month, meaning you need to manage the remaining budget of ${formatDemoAmount(foodBudget.amount - currentFood)} carefully to cover your food expenses for the rest of the month. If you exceed your budget, it would mean spending more than planned for this category, which could leave you with less money than intended for other expenses.`,
+        suggestion: `Before making any additional purchases in the food category, check your remaining budget of ${formatDemoAmount(foodBudget.amount - currentFood)} and prioritize necessary expenses to ensure it covers as much of the month as possible.`,
       },
       modelUsed: "Demo Rule Engine",
     },
