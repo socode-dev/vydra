@@ -33,7 +33,8 @@ export const TRIGGER_BUILDERS = {
             severity: data.derived?.risk_level ?? signal.severity ?? null,
             percentUsed: toNumber(data.derived?.percent_budget_used),
             compliance: data.derived?.compliance_status ?? null,
-            projectedTotal: toNumber(data.derived?.projected_total),
+            remainingBudget: toNumber(data.derived?.remaining_budget),
+            amountOverBudget: toNumber(data.derived?.amount_over_budget),
         };
 
         return toTrigger({

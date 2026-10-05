@@ -40,9 +40,9 @@ export const normalizeSignals = ({
                 orchestrationContext: {
                     category: item.category,
                     percentUsed: item?.derived?.percent_budget_used,
-                    projectedTotal: item?.derived?.projected_total,
                     compliance: item?.derived?.compliance_status,
-                    burnRate: item?.derived?.daily_burn_rate,
+                    remainingBudget: item?.derived?.remaining_budget,
+                    amountOverBudget: item?.derived?.amount_over_budget,
                 },
                 data: item
             })

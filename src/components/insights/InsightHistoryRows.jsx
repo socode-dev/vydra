@@ -1,6 +1,7 @@
 import clsx from "clsx";
 import { insightTypeLabel, formatInsightDate } from "./insightPresentation";
 import InsightBadge from "./InsightBadge";
+import Tooltip from "../ui/Tooltip";
 
 export default function InsightHistoryRows({ rows, explanation }) {
 
@@ -26,7 +27,7 @@ export default function InsightHistoryRows({ rows, explanation }) {
           <col className="w-[130px]" />
           <col />
           <col className="w-[150px]" />
-          <col className="w-[130px]" />
+          <col className="w-[160px]" />
           <col className="w-[120px]" />
         </colgroup>
         <thead>
@@ -46,9 +47,11 @@ export default function InsightHistoryRows({ rows, explanation }) {
                 {insightTypeLabel(history.type)}
               </th>
               <td>{history.category || "N/A"}</td>
-              <td className="text-sm leading-relaxed text-muted-foreground wrap-anywhere">
-                {explanation(history)}
-              </td>
+              <Tooltip content={explanation(history)} side="bottom">
+                <td className="text-sm leading-relaxed text-muted-foreground wrap-anywhere">
+                  <p className="line-clamp-2">{explanation(history)}</p>
+                </td>
+              </Tooltip>
               <td>
                 <InsightBadge value={history.severity} severity />
               </td>

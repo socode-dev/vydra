@@ -11,7 +11,7 @@ import { fadeUpVariants } from "./marketingMotionConfig";
 
 const story = [
   { label: "Activity", title: "Market and household groceries", detail: "A food purchase enters the activity stream.", darkSrc: activityDark, lightSrc: activityLight, alt: "Vydra transaction showing market and household groceries categorized as Food" },
-  { label: "Condition", title: "Food", detail: "Vydra detects that food spending has crossed its planned limit.", darkSrc: conditionDark, lightSrc: conditionLight, alt: "Vydra Food budget showing spending over its limit" },
+  { label: "Condition", title: "Food", detail: "Vydra detects that a large portion of the food budget has been used while time remains in the month.", darkSrc: conditionDark, lightSrc: conditionLight, alt: "Vydra Food budget showing spending over its limit" },
   { label: "Insight", title: "A signal with context", detail: "Vydra explains why the condition matters and suggests a next step.", darkSrc: insightDark, lightSrc: insightLight, alt: "Vydra financial insight explaining the Food spending condition" },
 ];
 

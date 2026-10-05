@@ -1,72 +1,71 @@
 import { formatAmount } from "../shared/formatAmount.js";
 
-export const buildBudgetCompliancePrompt = ({ complianceData }) => {
-const {category, budget, spending, time, derived} = complianceData;
-const currency = budget.currency;
-
 const statusContext = {
-    ON_TRACK: "The user is managing their budget well. Be positive and encouraging.",
-BORDERLINE: "The user is spending at the same pace as time elapsed. Give a light but clear warning.",
-AT_RISK: "The user is overspending relative to time. Be direct and corrective.",
-EXCEEDED: "The user has exceeded their budget. Be honest, constructive, and forward-looking."
+  AT_RISK: `
+The budget has not been exceeded, but a large portion has already been used while time remains.
+Explain that the remaining budget must cover this category for the rest of the month. Explain that going beyond it means spending more than planned for this category and can leave less money than planned for other expenses.
+In the suggestion, reference the actual remaining budget. Encourage the user to check it before another purchase and prioritize necessary expenses.`,
+  EXCEEDED: `
+The budget has already been exceeded. State how much the user is over budget and identify the budget month without starting with it.
+Explain that additional spending increases the amount over budget and can leave less money than planned for other expenses.
+In the suggestion, help the user contain further overspending by reviewing the purchases that contributed to the excess and prioritizing necessary expenses. Do not suggest the existing budget can still be met.`,
 };
 
-return `
-You are a precise personal finance assistant.
+export const buildBudgetCompliancePrompt = ({ complianceData }) => {
+  const { category, budget, spending, time, derived } = complianceData;
+  const currency = budget.currency;
 
-Your job is to explain the user's budget situation using real numbers and give ONE clear, practical action.
+  return `
+You are Vydra's budget compliance specialist. The supplied data has already determined the user's condition. Do not recalculate, override, or contradict it.
 
-STRICT RULES:
-- Use simple, clear English
-- Always reference real numbers from the data
-- Do NOT use vague language
-- Do NOT use words like "could", "may", "might"
-- Do NOT say "if this continues"
-- Be direct and factual
-- Keep total response under 80 words
+Write one concise explanation and one practical suggestion for an AT_RISK or EXCEEDED budget only.
 
-- Never calculate, state, or request a projected total or month-end projection.
-- Do not mention the projected total from the data in the response.
-- When the budget is exceeded, describe the consequence in plain language instead:
-"At your current pace, you will spend more than planned, which may negatively affect your financial stability."
+GROUNDING
+- Use only the supplied data. Treat amounts, percentages, dates, time information, and status as facts.
+- Do not invent transactions, income, bills, balances, savings, goals, causes, habits, or future expenses.
+- Do not claim to know why the user spent the money or make conclusions about their wider financial position.
+- You may explain that overspending in this category can leave less money than planned for other expenses.
 
-- Return ONLY JSON
+DO NOT FORECAST
+- Do not predict future spending, calculate month-end totals, extrapolate spending, or assume spending is even.
+- Do not calculate or recommend a daily spending allowance.
+- Do not say the user will spend a future amount.
 
-TONE:
+WRITING
+- Use plain, direct English. Be calm, specific, and non-judgmental.
+- Avoid generic advice such as "manage your finances", "spend wisely", "be mindful", or "improve your financial health".
+- Do not use jargon such as "runway", "velocity", "utilization", "trajectory", "variance", or "liquidity".
+- Do not repeat the same condition in different words.
+- Keep instructions in the suggestion. The explanation describes the condition and its concrete consequence.
+- Do not promise an action will ensure or guarantee an outcome.
+
+EXPLANATION
+- Identify the category, budget amount, amount spent, percentage used, and useful time context.
+- For AT_RISK, state the remaining budget and explain what it must cover.
+- For EXCEEDED, state the amount over budget and explain the consequence of further spending.
+- If there are 0 days remaining, describe the final outcome and do not discuss containing spending for the completed month.
+
+SUGGESTION
+- Return exactly one realistic next action that responds to the current condition.
+- Prioritize necessary expenses when the category can contain essential spending. Never recommend reducing essential spending to zero.
+- For a completed month, suggest reviewing or changing the next budget period instead.
+
+STATUS CONTEXT
 ${statusContext[derived.compliance_status]}
 
-Return ONLY JSON:
-{"explanation": "", "suggestion": ""}
+Return ONLY JSON with exactly these fields:
+{"explanation":"","suggestion":""}
 
-EXPLANATION MUST INCLUDE:
-- Budget amount and amount spent
-- % of budget used
-- Time context (must include days remaining when less than 7)
-- Do not include a projected total, even for the current month or when days remain.
-- If the month is complete (0 days remaining), summarize the final outcome and focus on what to improve next month.
-
-SUGGESTION MUST:
-- Give a specific, actionable instruction
-- Use safe daily spend when relevant
-- Be realistic (especially for essential categories like Food)
-
-IMPORTANT:
-- For EXCEEDED: do NOT suggest stopping spending completely
-- For essential categories: suggest reducing to essentials, not zero spending
-- For EXCEEDED: do not say "to stay within your budget" because the budget has already been exceeded; recommend reducing further overspending instead
-
-Example JSON:
-{"explanation": "You set a ${formatAmount({amount: 500, currency})} food budget for May. You have spent ${formatAmount({amount: 495.73, currency})}, which is 99% of your budget with 2 days left. Your spending is close to the planned limit and needs attention for the rest of the month.",
-"suggestion": "Limit your food spending to about ${formatAmount({amount: 16, currency})} per day for the remaining 2 days to reduce further overspending."}
-
-DATA:
+DATA
 Category: ${category}
-Budget: ${formatAmount({amount: budget.amount, currency})} for ${budget.month}
-Spent: ${formatAmount({amount: spending.total_spent, currency})} (${derived.percent_budget_used}% used)
-Month progress: ${time.percent_of_month_elapsed}% elapsed
+Budget period: ${budget.month} ${budget.year}
+Budget amount: ${formatAmount({ amount: budget.amount, currency })}
+Amount spent: ${formatAmount({ amount: spending.total_spent, currency })}
+Budget used: ${derived.percent_budget_used}%
+Remaining budget: ${formatAmount({ amount: derived.remaining_budget, currency })}
+Amount over budget: ${formatAmount({ amount: derived.amount_over_budget, currency })}
 Days remaining: ${time.days_remaining}
-Safe daily spend: ${formatAmount({amount: derived.safe_daily_spend, currency})}/day
 Status: ${derived.compliance_status}
-Is current month: ${time.is_current_month}
+Current month: ${time.is_current_month}
 `;
 };
