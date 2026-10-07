@@ -7,9 +7,10 @@ import { buildOrchestrationPrompt } from "../ai/prompts/orchestrator.js";
 import { buildCashflowData } from "../financial-signals/cashflow.js";
 import { buildBudgetComplianceData } from "../financial-signals/budget.js";
 import {
-  cashflowRiskUser,
   exceedingBudgetsUser,
+  expense,
   fixedSystemDate,
+  income,
   normalUser,
 } from "./fixtures/index.js";
 import { assertPromptSanitized } from "./fixtures/fixture-validators.js";
@@ -92,12 +93,18 @@ describe("prompt builders", () => {
     vi.setSystemTime(new Date(fixedSystemDate));
 
     const riskPrompt = buildCashflowPrompt({
-      cashflowData: buildCashflowData({ transactions: cashflowRiskUser.transactions, currency }),
+      cashflowData: buildCashflowData({
+        transactions: [
+          income({ id: "income-jun", amount: 4000, month: 6 }),
+          expense({ id: "spend-jun", category: "Food", amount: 4150, month: 6, day: 10 }),
+        ],
+        currency,
+      }),
     });
     const safeCashflowData = buildCashflowData({ transactions: normalUser.transactions, currency });
 
-    expect(riskPrompt).toContain("Current income:");
-    expect(riskPrompt).toContain("Spent:");
+    expect(riskPrompt).toContain("Recorded income:");
+    expect(riskPrompt).toContain("Recorded spending:");
     expect(riskPrompt).toContain("Days remaining:");
     expect(riskPrompt).toContain("Outcome: RISK");
     expect(safeCashflowData).toBeNull();
@@ -178,7 +185,13 @@ describe("prompt builders", () => {
     vi.setSystemTime(new Date(fixedSystemDate));
 
     const cashflowPrompt = buildCashflowPrompt({
-      cashflowData: buildCashflowData({ transactions: cashflowRiskUser.transactions, currency }),
+      cashflowData: buildCashflowData({
+        transactions: [
+          income({ id: "income-jun", amount: 4000, month: 6 }),
+          expense({ id: "spend-jun", category: "Food", amount: 4150, month: 6, day: 10 }),
+        ],
+        currency,
+      }),
     });
     const budgetPrompt = buildBudgetCompliancePrompt({
       complianceData: buildBudgetComplianceData({
@@ -188,7 +201,7 @@ describe("prompt builders", () => {
       }),
     });
 
-    expect(cashflowPrompt).toContain("Return ONLY JSON");
+    expect(cashflowPrompt).toContain("Return ONLY valid JSON");
     expect(budgetPrompt).toContain("Return ONLY JSON");
     assertPromptSanitized(cashflowPrompt);
     assertPromptSanitized(budgetPrompt);

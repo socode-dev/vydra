@@ -2,7 +2,6 @@ import { describe, expect, it, vi } from "vitest";
 import { buildCashflowData } from "../financial-signals/cashflow.js";
 import {
   cashflowBreakEvenUser,
-  cashflowRiskUser,
   cashflowWithFutureTransactionsUser,
   edgeCaseUsers,
   expense,
@@ -15,30 +14,10 @@ import {
   normalUser,
 } from "./fixtures/index.js";
 
-const expectAccountingInvariant = result => {
-  const expectedBalance = Math.max(0, Number((result.income.total - result.spending.total_spent).toFixed(2)));
-
-  expect(result.spending.current_balance).toBe(expectedBalance);
-};
-
-const expectProjectionInvariant = result => {
-  if (result.derived.projection_confidence === "LOW") {
-    expect(result.forecast.projected_total_spend).toBeNull();
-    expect(result.forecast.projected_remaining_balance).toBeNull();
-    return;
-  }
-
-  const totalDaysInMonth = result.period.days_elapsed + result.period.days_remaining;
-  const roundedDailyBurnRate = Number((result.spending.total_spent / result.period.days_elapsed).toFixed(2));
-  const rawProjectedSpend = Number((roundedDailyBurnRate * totalDaysInMonth).toFixed(2));
-  const expectedProjectedSpend = Math.min(
-    rawProjectedSpend,
-    result.income.total > 0 ? result.income.total * 2 : rawProjectedSpend
+const expectNetCashflowInvariant = result => {
+  expect(result.derived.net_cashflow).toBe(
+    Number((result.income.total - result.spending.total_spent).toFixed(2)),
   );
-  const expectedRemainingBalance = Number(Math.max(0, result.income.total - expectedProjectedSpend).toFixed(2));
-
-  expect(result.forecast.projected_total_spend).toBe(expectedProjectedSpend);
-  expect(result.forecast.projected_remaining_balance).toBe(expectedRemainingBalance);
 };
 
 describe("cashflow engine", () => {
@@ -53,39 +32,43 @@ describe("cashflow engine", () => {
     vi.useRealTimers();
   });
 
-  it("flags current-month cashflow risk when spending is almost all income", () => {
+  it("flags current-month cashflow risk when spending exceeds recorded income", () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date(fixedSystemDate));
 
-    const result = buildCashflowData({ transactions: cashflowRiskUser.transactions, currency: "NGN" });
+    const result = buildCashflowData({
+      transactions: [
+        income({ id: "income-jun", amount: 4000, month: 6 }),
+        expense({ id: "spend-jun", category: "Food", amount: 4150, month: 6, day: 10 }),
+      ],
+      currency: "NGN",
+    });
 
     expect(result.outcome).toBe("RISK");
-    expect(result.derived.percent_spent).toBe(98);
-    expect(result.forecast.projected_remaining_balance).toBe(0);
-    expectAccountingInvariant(result);
-    expectProjectionInvariant(result);
+    expect(result.derived.percent_spent).toBe(104);
+    expect(result.derived.net_cashflow).toBe(-150);
+    expectNetCashflowInvariant(result);
 
     vi.useRealTimers();
   });
 
-  it("captures the warning threshold at 85% projected spend", () => {
+  it("captures a warning when spending is disproportionate early in the month", () => {
     vi.useFakeTimers();
-    vi.setSystemTime(new Date(fixedSystemDate));
+    vi.setSystemTime(new Date("2026-06-05T12:00:00.000Z"));
 
     const warningUser = {
       ...normalUser,
       transactions: [
         income({ id: "income-jun", amount: 4000, month: 6 }),
-        expense({ id: "spend-jun", category: "Food", amount: 1700.1, month: 6, day: 10 }),
+        expense({ id: "spend-jun", category: "Food", amount: 1700.1, month: 6, day: 4 }),
       ],
     };
 
     const result = buildCashflowData({ transactions: warningUser.transactions, currency: "NGN" });
 
-    expect(result.forecast.projected_total_spend).toBeGreaterThanOrEqual(3400);
     expect(result.outcome).toBe("WARNING");
-    expectAccountingInvariant(result);
-    expectProjectionInvariant(result);
+    expect(result.derived.percent_spent).toBe(43);
+    expectNetCashflowInvariant(result);
 
     vi.useRealTimers();
   });
@@ -98,8 +81,8 @@ describe("cashflow engine", () => {
 
     expect(result.derived.has_no_income).toBe(true);
     expect(result.outcome).toBe("RISK");
-    expectAccountingInvariant(result);
-    expectProjectionInvariant(result);
+    expect(result.derived.net_cashflow).toBe(-result.spending.total_spent);
+    expectNetCashflowInvariant(result);
 
     vi.useRealTimers();
   });
@@ -115,17 +98,13 @@ describe("cashflow engine", () => {
     vi.useRealTimers();
   });
 
-  it("keeps accounting correct when income arrives after early spending", () => {
+  it("returns null when income covers earlier spending without a disproportionate pace", () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date(fixedSystemDate));
 
     const result = buildCashflowData({ transactions: incomeAfterSpendingUser.transactions, currency: "NGN" });
 
-    expect(result.outcome).toBe("WARNING");
-    expect(result.income.total).toBe(3500);
-    expect(result.spending.total_spent).toBe(1600);
-    expectAccountingInvariant(result);
-    expectProjectionInvariant(result);
+    expect(result).toBeNull();
 
     vi.useRealTimers();
   });
@@ -187,10 +166,10 @@ describe("cashflow engine", () => {
 
     expect(result.income.total).toBe(4000);
     expect(result.spending.total_spent).toBe(4000);
-    expect(result.spending.current_balance).toBe(0);
     expect(result.derived.percent_spent).toBe(100);
-    expectAccountingInvariant(result);
-    expectProjectionInvariant(result);
+    expect(result.derived.net_cashflow).toBe(0);
+    expect(result.outcome).toBe("RISK");
+    expectNetCashflowInvariant(result);
 
     vi.useRealTimers();
   });

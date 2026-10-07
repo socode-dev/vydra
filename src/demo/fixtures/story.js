@@ -199,7 +199,6 @@ const buildContributions = (referenceDate) => {
 
 const buildInsights = (referenceDate, transactions, budgets) => {
   const latest = monthStart(referenceDate);
-  const label = monthLabel(latest);
   const latestMonth = toDateKey(latest).slice(0, 7);
   const foodTransactions = transactions.filter((transaction) => transaction.categoryKey === "txn:food");
   const currentFood = sum(foodTransactions.filter((transaction) => transaction.date.startsWith(latestMonth)));
@@ -214,6 +213,8 @@ const buildInsights = (referenceDate, transactions, budgets) => {
   const weeklyFoodBudget = foodBaseline / 4;
   const currentIncome = sum(transactions.filter((transaction) => transaction.type === "income" && transaction.date.startsWith(latestMonth)));
   const currentSpending = sum(transactions.filter((transaction) => transaction.type === "expense" && transaction.date.startsWith(latestMonth)));
+  const amountOverIncome = Math.max(currentSpending - currentIncome, 0);
+  const daysRemaining = new Date(latest.getFullYear(), latest.getMonth() + 1, 0).getDate() - referenceDate.getDate();
   const spendingPercent = Math.round((currentSpending / currentIncome) * 100);
   const budgetStatus = currentFood >= foodBudget.amount ? "EXCEEDED" : "ON_TRACK";
   const cashflowOutcome = spendingPercent >= 85 ? "WARNING" : "SAFE";
@@ -285,8 +286,8 @@ const buildInsights = (referenceDate, transactions, budgets) => {
       createdAt: created(10),
       expiresAt: expiresAfterTtl(created(10)),
       agent: {
-        explanation: `${label} spending is ${formatDemoAmount(currentSpending)} against ${formatDemoAmount(currentIncome)} of income (${spendingPercent}% used), so the remaining cash position deserves attention even though income remains active.`,
-        suggestion: "Review upcoming fixed commitments before taking on new discretionary spending.",
+        explanation: `Spending has exceeded recorded income by ${formatDemoAmount(amountOverIncome)} with ${daysRemaining} days remaining in the month. This means you have spent more than you have earned this month.`,
+        suggestion: "Prioritize necessary expenses and limit any non-essential spending for the rest of the month.",
       },
       modelUsed: "Demo Rule Engine",
     },
