@@ -3,6 +3,7 @@ import {
   subcollectionListener,
 } from "../firebase/firestoreListener";
 import { useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import useAuthStore from "../store/useAuthStore";
 import useTransactionStore from "../store/useTransactionStore";
 import useThresholdStore from "../store/useThresholdStore";
@@ -16,11 +17,13 @@ import { isDemoUser, useDemoMode } from "../demo/useDemoMode";
 
 const AppInitializer = () => {
   const isDemoMode = useDemoMode();
+  const { pathname } = useLocation();
 
   const user = useAuthStore((state) => state.currentUser);
   const userId = user?.uid;
 
   const isDemoSession = isDemoMode || isDemoUser(user);
+  const isDashboardRoute = pathname.startsWith("/dashboard");
 
   const setCategories = useTransactionStore((state) => state.setCategories);
 
@@ -42,7 +45,7 @@ const AppInitializer = () => {
 
   // Record observed product activity once per customer per UTC day.
   useEffect(() => {
-    if (isDemoSession) return;
+    if (isDemoSession || !isDashboardRoute) return;
     if (!userId) return;
 
     void trackBusinessEvent({
@@ -50,11 +53,11 @@ const AppInitializer = () => {
       eventType: "customer_active",
       surface: "authenticated_session",
     });
-  }, [isDemoSession, userId]);
+  }, [isDashboardRoute, isDemoSession, userId]);
 
   // Real-time listener for thresholds
   useEffect(() => {
-    if (isDemoSession) return;
+    if (isDemoSession || !isDashboardRoute) return;
     if (!userId) return;
 
     const userDocRef = doc(db, "users", userId);
@@ -74,11 +77,11 @@ const AppInitializer = () => {
       unsubscribeInsights();
       unsubscribeThresholds();
     };
-  }, [isDemoSession, userId, initInsights, setThresholds]);
+  }, [isDashboardRoute, isDemoSession, userId, initInsights, setThresholds]);
 
   // Listen to transaction categories
   useEffect(() => {
-    if (isDemoSession) return;
+    if (isDemoSession || !isDashboardRoute) return;
     if (!userId) return;
 
     const unsubscribe = subcollectionListener(
@@ -90,11 +93,11 @@ const AppInitializer = () => {
     return () => {
       unsubscribe();
     };
-  }, [isDemoSession, userId, setCategories]);
+  }, [isDashboardRoute, isDemoSession, userId, setCategories]);
 
   // Generate insights
   useEffect(() => {
-    if (isDemoSession) return;
+    if (isDemoSession || !isDashboardRoute) return;
     if (!userId) return;
 
     let cancelled = false;
@@ -126,7 +129,7 @@ const AppInitializer = () => {
     return () => {
       cancelled = true;
     };
-  }, [isDemoSession, userId]);
+  }, [isDashboardRoute, isDemoSession, userId]);
 
   return null;
 };

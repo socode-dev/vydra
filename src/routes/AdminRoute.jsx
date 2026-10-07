@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
-import { Navigate } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
 import { auth } from "../firebase/firebase";
 import { isDemoUser } from "../demo/useDemoMode";
 import useAuthStore from "../store/useAuthStore";
 import AuthLoadingScreen from "../components/ui/AuthLoadingScreen";
+import Button from "../components/ui/Button";
 import { syncAdminAccess } from "../api/adminAccess";
 
 const AdminAccessDenied = () => (
@@ -18,6 +19,9 @@ const AdminAccessDenied = () => (
       <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
         Your Vydra account does not have permission to view the Admin Dashboard.
       </p>
+      <Button as={Link} to="/dashboard" className="mt-6">
+        Go to dashboard
+      </Button>
     </section>
   </main>
 );

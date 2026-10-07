@@ -12,13 +12,16 @@ import { useDropdownClose } from "../hooks/useDropdownClose";
 import useCurrencyStore from "../store/useCurrencyStore";
 import useAuthStore from "../store/useAuthStore";
 import { isDemoUser, useDemoMode } from "../demo/useDemoMode";
+import { useLocation } from "react-router-dom";
 
 const MainContext = createContext();
 
 export const MainProvider = ({ children }) => {
   const isDemoMode = useDemoMode();
+  const { pathname } = useLocation();
   const user = useAuthStore((state) => state.currentUser);
   const isDemoSession = isDemoMode || isDemoUser(user);
+  const isDashboardRoute = pathname.startsWith("/dashboard");
   const loadTransactions = useTransactionStore(
     (state) => state.loadTransactions,
   );
@@ -102,7 +105,7 @@ export const MainProvider = ({ children }) => {
 
   // Load all transactions, budgets, goals on mount
   useEffect(() => {
-    if (isDemoSession || !user?.uid) return;
+    if (isDemoSession || !isDashboardRoute || !user?.uid) return;
 
     const currentUserId = user.uid;
     let isCancelled = false;
@@ -131,6 +134,7 @@ export const MainProvider = ({ children }) => {
       isCancelled = true;
     };
   }, [
+    isDashboardRoute,
     isDemoSession,
     user,
     fetchCurrencies,

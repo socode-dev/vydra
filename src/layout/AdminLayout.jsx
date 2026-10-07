@@ -10,11 +10,11 @@ const AdminLayout = () => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   return (
-    <div className="flex h-dvh min-w-0 overflow-hidden bg-background font-sans text-foreground">
+    <div className="fixed inset-0 flex min-w-0 overflow-hidden bg-background font-sans text-foreground">
       <div
         id="admin-sidebar"
         className={clsx(
-          "hidden shrink-0 transition-[width] duration-200 lg:block",
+          "hidden h-full shrink-0 transition-[width] duration-200 lg:block",
           sidebarCollapsed ? "w-18" : "w-72",
         )}
       >

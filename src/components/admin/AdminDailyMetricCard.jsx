@@ -54,7 +54,7 @@ const AdminDailyMetricCard = ({ daily, metricKey, label, description, icon: Icon
                         max={availableDates.at(-1)}
                         onChange={event => setSelectedDate(event.target.value)}
                         aria-label={`${label} date`}
-                        className="box-border h-10 w-full max-w-full min-w-0 rounded-xl border border-border bg-background pl-9 pr-2 text-sm text-foreground shadow-xs outline-none transition-colors focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-ring/40"
+                        className="admin-date-input box-border h-10 w-full max-w-full min-w-0 rounded-xl border border-border bg-background pl-9 pr-2 text-sm text-foreground shadow-xs outline-none transition-colors focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-ring/40"
                         disabled={!availableDates.length}
                     />
                 </span>
