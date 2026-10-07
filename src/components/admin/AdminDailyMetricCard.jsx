@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { FiCalendar } from "react-icons/fi";
+import Input from "../ui/Input";
 
 const formatDate = dateKey => new Intl.DateTimeFormat(undefined, {
     day: "numeric",
@@ -45,19 +45,16 @@ const AdminDailyMetricCard = ({ daily, metricKey, label, description, icon: Icon
             </p>
             <label className="mt-4 block text-xs font-medium text-muted-foreground">
                 Select date
-                <span className="relative mt-1.5 block">
-                    <FiCalendar className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
-                    <input
-                        type="date"
-                        value={selectedDate}
-                        min={availableDates[0]}
-                        max={availableDates.at(-1)}
-                        onChange={event => setSelectedDate(event.target.value)}
-                        aria-label={`${label} date`}
-                        className="admin-date-input box-border h-10 w-full max-w-full min-w-0 rounded-xl border border-border bg-background pl-9 pr-2 text-sm text-foreground shadow-xs outline-none transition-colors focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-ring/40"
-                        disabled={!availableDates.length}
-                    />
-                </span>
+                <Input
+                    type="date"
+                    value={selectedDate}
+                    min={availableDates[0]}
+                    max={availableDates.at(-1)}
+                    onChange={event => setSelectedDate(event.target.value)}
+                    aria-label={`${label} date`}
+                    className="mt-1.5 max-w-full appearance-none"
+                    disabled={!availableDates.length}
+                />
             </label>
         </article>
     );
