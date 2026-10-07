@@ -8,7 +8,9 @@ import {
   cashflowRiskUser,
   budget,
   exceedingBudgetsUser,
+  expense,
   fixedSystemDate,
+  income,
   normalUser,
   threeCategoryOverspendingUser,
 } from "./fixtures/index.js";
@@ -24,6 +26,14 @@ const toNgnTransactions = transactions =>
 const toNgnBudget = budget => ({
   ...budget,
   amount: budget.amount * 100,
+});
+
+const cashflowRiskData = () => buildCashflowData({
+  transactions: toNgnTransactions([
+    income({ id: "income-jun", amount: 4000, month: 6 }),
+    expense({ id: "spend-jun", category: "Food", amount: 4150, month: 6, day: 10 }),
+  ]),
+  currency,
 });
 
 const complianceFor = user =>
@@ -108,7 +118,7 @@ describe("financial risk engine", () => {
         highAnomaly("high-3", "Food", 280),
       ],
       budgetCompliance: [exceededBudgetCompliance("budget-food", "Food", 110)],
-      cashflowData: buildCashflowData({ transactions: toNgnTransactions(cashflowRiskUser.transactions), currency }),
+      cashflowData: cashflowRiskData(),
       transactions: toNgnTransactions(cashflowRiskUser.transactions),
       currency
     });
@@ -193,7 +203,7 @@ describe("financial risk engine", () => {
         highAnomaly("high-anomaly-food-3", "Food", 240),
       ],
       budgetCompliance: complianceFor(normalUser),
-      cashflowData: buildCashflowData({ transactions: toNgnTransactions(cashflowRiskUser.transactions), currency }),
+      cashflowData: cashflowRiskData(),
       transactions: toNgnTransactions(cashflowRiskUser.transactions),
       currency
     });
@@ -275,7 +285,7 @@ describe("financial risk engine", () => {
     const risk = buildRiskData({
       anomalies: manyAnomalies,
       budgetCompliance: [exceededBudgetCompliance("budget-food", "Food", 120)],
-      cashflowData: buildCashflowData({ transactions: toNgnTransactions(cashflowRiskUser.transactions), currency }),
+      cashflowData: cashflowRiskData(),
       transactions: toNgnTransactions(exceedingBudgetsUser.transactions),
       currency
     });
