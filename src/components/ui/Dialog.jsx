@@ -94,7 +94,7 @@ const DialogContent = ({
         transition={{ duration: reducedMotion ? 0 : 0.16, ease: "easeOut" }}
         onKeyDown={handleKeyDown}
         className={clsx(
-          "max-h-[calc(100dvh-2rem)] w-full max-w-[500px] overflow-y-auto rounded-lg border border-[rgb(var(--color-gray-border))] bg-[rgb(var(--color-bg-card))] text-[rgb(var(--color-text))] shadow-xl outline-none scrollbar-thin",
+          "max-h-[calc(100dvh-2rem)] w-full max-w-[500px] overflow-y-auto rounded-2xl border border-[rgb(var(--color-gray-border))] bg-[rgb(var(--color-bg-card))] text-[rgb(var(--color-text))] shadow-xl outline-none scrollbar-thin",
           padded && "flex flex-col items-center gap-5 px-6 py-8",
           className,
         )}

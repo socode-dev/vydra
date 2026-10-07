@@ -25,6 +25,17 @@ export default async function handler(req, res) {
     const authResult = await requireUser(req, userId);
     if (!authResult.ok) return sendUserAuthError(res, authResult);
 
+    if (authResult.claims.email_verified !== true) {
+        return sendUserAuthError(res, {
+            ok: false,
+            status: 403,
+            error: {
+                code: "EMAIL_VERIFICATION_REQUIRED",
+                message: "Verify your email address before generating insights.",
+            },
+        });
+    }
+
     try {
         const { transactions, budgets } = await loadFinancialData({ userId });
 

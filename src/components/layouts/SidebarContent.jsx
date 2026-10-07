@@ -73,16 +73,14 @@ const SidebarContent = ({ collapsed = false, mobile = false, onToggleSidebar }) 
         </Tooltip>
 
         {mobile && (
-          <Tooltip content="Close navigation" side="bottom">
-            <Button
-              variant="ghost"
-              className="ml-auto size-10 shrink-0 p-0!"
-              onClick={close}
-              aria-label="Close navigation"
-            >
-              <FiX aria-hidden="true" size={20} />
-            </Button>
-          </Tooltip>
+          <Button
+            variant="ghost"
+            className="ml-auto size-10 shrink-0 p-0!"
+            onClick={close}
+            aria-label="Close navigation"
+          >
+            <FiX aria-hidden="true" size={20} />
+          </Button>
         )}
       </div>
 

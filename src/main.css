@@ -179,6 +179,25 @@ body {
   scrollbar-width: thin;
 }
 
+/* Keep Safari's native date segments within narrow admin metric cards. */
+.admin-date-input {
+  -webkit-text-size-adjust: 100%;
+}
+
+.admin-date-input::-webkit-date-and-time-value,
+.admin-date-input::-webkit-datetime-edit,
+.admin-date-input::-webkit-datetime-edit-fields-wrapper {
+  min-width: 0;
+}
+
+.admin-date-input::-webkit-datetime-edit {
+  padding: 0;
+}
+
+.admin-date-input::-webkit-calendar-picker-indicator {
+  margin: 0;
+}
+
 .marketing-page {
   --marketing-glow: color-mix(in srgb, var(--primary) 22%, transparent);
   --marketing-frame: color-mix(in srgb, var(--card) 92%, transparent);
