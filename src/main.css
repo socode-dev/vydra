@@ -92,7 +92,7 @@
   --success: oklch(0.72 0.14 162);
   --success-soft: oklch(0.3 0.05 162);
   --danger: oklch(0.7 0.17 25);
-  --danger-soft: oklch(0.31 0.07 25);
+  --danger-soft: oklch(26.625% 0.05709 24.884);
   --warning: oklch(0.78 0.13 78);
   --warning-soft: oklch(0.32 0.06 78);
   --info-soft: oklch(0.3 0.05 266);
