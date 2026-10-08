@@ -1,11 +1,6 @@
 import { useMemo } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import {
-  FiCheckCircle,
-  FiClock,
-  FiLink,
-  FiUserCheck,
-} from "react-icons/fi";
+import { FiCheckCircle, FiClock, FiLink } from "react-icons/fi";
 import AuthFormShell from "../components/auth/AuthFormShell";
 import AuthFooter from "../components/auth/AuthFooter";
 import PasswordField from "../components/auth/PasswordField";
@@ -23,15 +18,14 @@ const ActivateInvite = () => {
     [searchParams],
   );
   const {
-    currentUser,
     error,
     form,
     handleChange,
-    handleRetryActivation,
     handleSubmit,
     invite,
     status,
   } = useInviteActivation(token);
+
   const submitting = status === "submitting";
 
   if (status === "validating") {
@@ -67,7 +61,7 @@ const ActivateInvite = () => {
         description="This invitation cannot be used to create or activate an account."
       >
         <div className="rounded-2xl border border-danger/20 bg-danger-soft p-5">
-          <span className="flex size-11 items-center justify-center rounded-xl bg-card text-danger shadow-xs">
+          <span className="flex size-11 items-center justify-center rounded-xl bg-danger/50 text-danger shadow-xs">
             <FiLink aria-hidden="true" size={21} />
           </span>
           <Alert className="mt-4 border-0 bg-transparent p-0" role="alert">
@@ -115,83 +109,57 @@ const ActivateInvite = () => {
       }
     >
       {error && <Alert className="mb-4">{error}</Alert>}
-      {currentUser ? (
-        <section
-          aria-label="Account activation"
-          aria-busy={submitting}
-          className="rounded-2xl border border-border bg-card p-5 shadow-sm"
-        >
-          <div className="mb-5 flex items-start gap-3">
-            <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-info-soft text-primary">
-              <FiUserCheck aria-hidden="true" size={20} />
-            </span>
-            <div className="min-w-0">
-              <h2 className="font-medium">Continue with your account</h2>
-              <p className="mt-1 break-words text-sm leading-relaxed text-muted-foreground">
-                You are signed in as {currentUser.email}. Continue to activate
-                this invitation.
-              </p>
-            </div>
-          </div>
+
+      <div className="mb-5 flex items-center gap-3 rounded-xl border border-border bg-surface px-4 py-3 text-sm text-muted-foreground">
+        <FiClock aria-hidden="true" className="shrink-0 text-primary" />
+        <span>This invitation can only be used once.</span>
+      </div>
+
+      <form onSubmit={handleSubmit} aria-busy={submitting}>
+        <fieldset disabled={submitting} className="min-w-0 space-y-4">
+          <FormField id="activation-email" label="Email" required>
+            {(fieldProps) => (
+              <Input
+                {...fieldProps}
+                name="email"
+                type="email"
+                value={form.email}
+                onChange={handleChange}
+                autoComplete="email"
+                placeholder="Enter your email"
+              />
+            )}
+          </FormField>
+
+          <PasswordField
+            id="activation-password"
+            label="Password"
+            name="password"
+            value={form.password}
+            onChange={handleChange}
+            placeholder="Enter password"
+          />
+
+          <PasswordField
+            id="activation-confirm-password"
+            label="Confirm Password"
+            name="confirmPassword"
+            value={form.confirmPassword}
+            onChange={handleChange}
+            placeholder="Confirm password"
+          />
+
           <Button
-            onClick={handleRetryActivation}
+            type="submit"
             loading={submitting}
             loadingText="Activating account..."
             className="w-full"
           >
-            Activate account
+            Activate now
           </Button>
-        </section>
-      ) : (
-        <>
-          <div className="mb-5 flex items-center gap-3 rounded-xl border border-border bg-surface px-4 py-3 text-sm text-muted-foreground">
-            <FiClock aria-hidden="true" className="shrink-0 text-primary" />
-            <span>This invitation can only be used once.</span>
-          </div>
-          <form onSubmit={handleSubmit} aria-busy={submitting}>
-            <fieldset disabled={submitting} className="min-w-0 space-y-4">
-              <FormField id="activation-email" label="Email" required>
-                {(fieldProps) => (
-                  <Input
-                    {...fieldProps}
-                    name="email"
-                    type="email"
-                    value={form.email}
-                    onChange={handleChange}
-                    autoComplete="email"
-                    placeholder="Enter your email"
-                  />
-                )}
-              </FormField>
+        </fieldset>
+      </form>
 
-              <PasswordField
-                id="activation-password"
-                label="Password"
-                name="password"
-                value={form.password}
-                onChange={handleChange}
-                placeholder="Enter password"
-              />
-              <PasswordField
-                id="activation-confirm-password"
-                label="Confirm Password"
-                name="confirmPassword"
-                value={form.confirmPassword}
-                onChange={handleChange}
-                placeholder="Confirm password"
-              />
-              <Button
-                type="submit"
-                loading={submitting}
-                loadingText="Activating account..."
-                className="w-full"
-              >
-                Activate now
-              </Button>
-            </fieldset>
-          </form>
-        </>
-      )}
       <AuthFooter to="/login" linkText="Back to login">
         Already have an account?
       </AuthFooter>

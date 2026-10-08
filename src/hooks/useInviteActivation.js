@@ -1,8 +1,38 @@
 import { useEffect, useState } from "react";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "../firebase/firebase";
-import { doCreateUserWithEmailAndPassword } from "../firebase/auth";
+import { doCreateUserWithEmailAndPassword, doSignOut } from "../firebase/auth";
 import { activateInviteToken, validateInviteToken } from "../api/invites";
+import { getAuthErrorMessage } from "../utils/authErrorrs";
+
+const waitForSignedOut = () => {
+  return new Promise((resolve, reject) => {
+    const unsubscribe = onAuthStateChanged(
+      auth, user => {
+        if (user) return;
+
+        unsubscribe();
+        resolve();
+      },
+      reject,
+    );
+  });
+};
+
+const signOutForActivation = async () => {
+  if (!auth.currentUser) return;
+
+  const signedOut = waitForSignedOut();
+
+  await doSignOut();
+  await signedOut;
+};
+
+const getActivationErrorMessage = (error) => {
+  if (error?.code?.startsWith("auth/")) return getAuthErrorMessage(error);
+
+  return error?.message || "Activation could not be completed.";
+};
 
 const initialForm = {
   email: "",
@@ -15,16 +45,16 @@ const useInviteActivation = (token) => {
   const [invite, setInvite] = useState(null);
   const [form, setForm] = useState(initialForm);
   const [error, setError] = useState("");
-  const [currentUser, setCurrentUser] = useState(() => auth.currentUser);
-
-  useEffect(() => {
-    return onAuthStateChanged(auth, setCurrentUser);
-  }, []);
 
   useEffect(() => {
     let cancelled = false;
 
-    const validate = async () => {
+    const prepareActivation = async () => {
+      setStatus("validating");
+      setError("");
+      setInvite(null);
+      setForm(initialForm);
+
       if (!token) {
         setStatus("invalid");
         setError("Activation link is missing its invite token.");
@@ -32,7 +62,8 @@ const useInviteActivation = (token) => {
       }
 
       try {
-        setStatus("validating");
+        await signOutForActivation();
+
         const validatedInvite = await validateInviteToken(token);
 
         if (cancelled) return;
@@ -42,12 +73,17 @@ const useInviteActivation = (token) => {
       } catch (err) {
         if (cancelled) return;
 
-        setError(err.message);
+        setError(
+          err?.code?.startsWith("auth/")
+            ? "We could not prepare account activation. Please refresh and try again."
+            : err?.message || "Activation link could not be validated."
+        );
+
         setStatus(err.code === "INVITE_EXPIRED" ? "expired" : "invalid");
       }
     };
 
-    validate();
+    prepareActivation();
 
     return () => {
       cancelled = true;
@@ -58,10 +94,6 @@ const useInviteActivation = (token) => {
     const { name, value } = event.target;
 
     setForm((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const activateCurrentUser = async () => {
-    return activateInviteToken({ token });
   };
 
   const handleSubmit = async (event) => {
@@ -89,51 +121,24 @@ const useInviteActivation = (token) => {
     try {
       setStatus("submitting");
 
-      if (currentUser) {
-        await activateCurrentUser(currentUser);
-      } else {
-        const credential = await doCreateUserWithEmailAndPassword(
-          form.email.trim(),
-          form.password
-        );
+      await doCreateUserWithEmailAndPassword(
+        form.email.trim(),
+        form.password
+      );
 
-        await activateCurrentUser(credential.user);
-      }
+      await activateInviteToken({ token });
 
       setStatus("success");
     } catch (err) {
-      setError(err.message || "Activation could not be completed.");
-      setStatus("ready");
-    }
-  };
-
-  const handleRetryActivation = async () => {
-    const user = auth.currentUser;
-
-    if (!user) {
-      setError("Please enter your email and password to continue.");
-      return;
-    }
-
-    try {
-      setStatus("submitting");
-      setError("");
-
-      await activateCurrentUser(user);
-
-      setStatus("success");
-    } catch (err) {
-      setError(err.message || "Activation could not be completed.");
+      setError(getActivationErrorMessage(err));
       setStatus("ready");
     }
   };
 
   return {
-    currentUser,
     error,
     form,
     handleChange,
-    handleRetryActivation,
     handleSubmit,
     invite,
     status,
