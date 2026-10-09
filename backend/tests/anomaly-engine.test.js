@@ -39,11 +39,13 @@ const toNgnTransactions = transactions =>
   }));
 
 describe("anomaly engine", () => {
-  it("returns an anomaly signal when one category spikes above real history", () => {
+  it("returns anomaly signals when spending breaks recorded category history", () => {
     const result = detectAnomalies({transactions: toNgnTransactions(oneCategoryOverspendingUser.transactions), currency: "NGN"});
+    const foodAnomaly = result.find(anomaly => anomaly.category === "Food");
 
-    expect(result).toHaveLength(1);
-    expect(result[0]).toMatchObject({
+    expect(result).toHaveLength(2);
+    expect(result.map(anomaly => anomaly.category)).toEqual(["Food", "Transport"]);
+    expect(foodAnomaly).toMatchObject({
       type: "anomaly",
       category: "Food",
       risk: { level: "HIGH" },
@@ -105,8 +107,22 @@ describe("anomaly engine", () => {
     expect(result.map(anomaly => anomaly.category)).not.toContain("Rent");
   });
 
-  it("does not flag a brand-new category with no historical baseline", () => {
-    expect(detectAnomalies({ transactions: toNgnTransactions(newCategoryUser.transactions), currency: "NGN"})).toEqual([]);
+  it("flags a new category after sufficient account activity establishes zero-spend history", () => {
+    const result = detectAnomalies({ transactions: toNgnTransactions(newCategoryUser.transactions), currency: "NGN"});
+
+    expect(result).toHaveLength(1);
+    expect(result[0]).toMatchObject({
+      category: "Gadgets",
+      risk: { level: "HIGH" },
+      signal: {
+        baseline_value: 0,
+        current_value: 80000,
+      },
+      context: {
+        months_analyzed: 5,
+        previous_highest_value: 0,
+      },
+    });
   });
 
   it("refuses to emit a signal when only two months of history exist", () => {

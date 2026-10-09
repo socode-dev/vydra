@@ -6,7 +6,7 @@ import {fallback} from "../fallbacks/anomaly.js";
 export const runAnomalyService = async ({data, isDemo} = {}) => {
 
   const prompt = buildAnomalyPrompt({ anomaly: data });
-  const ruleBasedInsight = fallback({ anomaly: data })
+  const ruleBasedInsight = fallback({ anomaly: data });
   
   let response;
   let model;
