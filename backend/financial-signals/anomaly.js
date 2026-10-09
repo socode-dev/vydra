@@ -1,8 +1,7 @@
-import { parseISO, format } from "date-fns";
+import { parseISO, format, addMonths } from "date-fns";
 import { getMedian, getMAD, getRiskScore } from "./utils.js";
-import {v4 as uuidv4} from "uuid";
+import { v4 as uuidv4 } from "uuid";
 
-// Detect unusual monthly spend by category
 export const detectAnomalies = ({ transactions, currency }) => {
   const MIN_HISTORY_MONTHS = 4;
   const ROBUST_Z_THRESHOLD = 3;
@@ -10,46 +9,87 @@ export const detectAnomalies = ({ transactions, currency }) => {
   const MIN_ABSOLUTE_INCREASE = currency === "NGN" ? 5000 : 50;
 
   const byCategoryMonth = {};
+  const categoryMonths = {};
+  let firstActivityMonth = null;
 
   transactions?.forEach((transaction) => {
-    if (!transaction.date || !transaction.category || typeof transaction.amount !== 'number') {
-      return;
-    }
+    if (!transaction.date) return;
+
     const date = parseISO(transaction.date);
-    if (isNaN(date.getTime())) {
+    if (isNaN(date.getTime())) return;
+
+    const monthKey = format(date, "yyyy-MM");
+
+    if (!firstActivityMonth || monthKey < firstActivityMonth) {
+      firstActivityMonth = monthKey;
+    }
+
+    // Only expenses contribute to category spending.
+    if (
+      transaction.type !== "expense" ||
+      !transaction.category ||
+      typeof transaction.amount !== "number" ||
+      !Number.isFinite(transaction.amount)
+    ) {
       return;
     }
-    const monthKey = format(date, "yyyy-MM");
-    const monthLabel = format(date, "yyyy, MMM");
-    const key = `${transaction.category}__${monthKey}`;
+
+    const category = transaction.category;
+    const key = `${category}__${monthKey}`;
 
     if (!byCategoryMonth[key]) {
-      byCategoryMonth[key] = { total: 0, monthKey, monthLabel };
+      byCategoryMonth[key] = {
+        total: 0,
+        monthKey,
+        monthLabel: format(date, "yyyy, MMM"),
+      };
     }
 
     byCategoryMonth[key].total += transaction.amount;
+
+    if (!categoryMonths[category]) {
+      categoryMonths[category] = new Set();
+    }
+
+    categoryMonths[category].add(monthKey);
   });
 
-  // Category time series
   const categorySeries = {};
-  Object.entries(byCategoryMonth)?.forEach(([key, entry]) => {
-    const [category, monthKey] = key.split("__");
-    if (!categorySeries[category]) categorySeries[category] = [];
-    categorySeries[category].push({
-      monthKey,
-      month: entry.monthLabel,
-      total: entry.total,
-    });
+
+  Object.keys(categoryMonths).forEach((category) => {
+    const observedMonths = [...categoryMonths[category]].sort();
+    const latestMonth = observedMonths[observedMonths.length - 1];
+
+    const series = [];
+    let cursor = parseISO(`${firstActivityMonth}-01`);
+    const end = parseISO(`${latestMonth}-01`);
+
+    while (cursor <= end) {
+      const monthKey = format(cursor, "yyyy-MM");
+      const key = `${category}__${monthKey}`;
+      const entry = byCategoryMonth[key];
+
+      series.push({
+        monthKey,
+        month: format(cursor, "yyyy, MMM"),
+        total: entry?.total ?? 0,
+      });
+
+      cursor = addMonths(cursor, 1);
+    }
+
+    categorySeries[category] = series;
   });
 
   const anomalies = [];
 
-  Object.entries(categorySeries)?.forEach(([category, series]) => {
-    const sortedSeries = [...series].sort((a, b) => a.monthKey.localeCompare(b.monthKey));
+  Object.entries(categorySeries).forEach(([category, series]) => {
+    const sortedSeries = [...series].sort((a, b) =>
+      a.monthKey.localeCompare(b.monthKey)
+    );
 
     const values = sortedSeries.map((s) => s.total);
 
-    // Evaluate last month only
     const latestIndex = sortedSeries.length - 1;
     const { month, total } = sortedSeries[latestIndex];
     const historyValues = values.slice(0, -1);
@@ -58,13 +98,23 @@ export const detectAnomalies = ({ transactions, currency }) => {
 
     const median = getMedian(historyValues);
     const mad = getMAD(historyValues, median) || 1e-6;
-    const deviationPercent = median !== 0 ? ((total - median) / median) * 100 : (total > 0 ? Infinity : 0);
+
+    const deviationPercent =
+      median !== 0
+        ? ((total - median) / median) * 100
+        : total > 0
+          ? Infinity
+          : 0;
+
     const historyMin = Math.min(...historyValues);
     const historyMax = Math.max(...historyValues);
     const maxVal = Math.max(...values);
     const minVal = Math.min(...values);
 
-    const robustZ = Math.abs((total - median) / (1.4826 * mad));
+    const robustZ = Math.abs(
+      (total - median) / (1.4826 * mad)
+    );
+
     const deviationAbsolute = total - median;
 
     const isMeaningfulIncrease =
@@ -73,9 +123,12 @@ export const detectAnomalies = ({ transactions, currency }) => {
       deviationAbsolute >= MIN_ABSOLUTE_INCREASE &&
       deviationPercent >= MIN_PERCENT_INCREASE;
 
-    if (robustZ < ROBUST_Z_THRESHOLD || !isMeaningfulIncrease) return;
+    if (robustZ < ROBUST_Z_THRESHOLD || !isMeaningfulIncrease) {
+      return;
+    }
 
-    const previous = values[latestIndex - 1] || median;
+    const previous = values[latestIndex - 1] ?? median;
+
     const trend =
       total > previous
         ? "increasing"
@@ -90,7 +143,7 @@ export const detectAnomalies = ({ transactions, currency }) => {
         ? `${Math.round(deviationPercent)}% more`
         : `${Math.abs(Math.round(deviationPercent))}% less`;
 
-    const recentHistory = series.slice(-5, -1);
+    const recentHistory = sortedSeries.slice(-5, -1);
     const formattedHistory = recentHistory.map((item) => ({
       month: item.month,
       total: item.total,
@@ -102,11 +155,13 @@ export const detectAnomalies = ({ transactions, currency }) => {
       category,
       currency,
       timestamp: new Date().toISOString(),
+
       risk: {
         score: riskScore,
         level: robustZ >= 5 ? "HIGH" : "MEDIUM",
         confidence: 0.8,
       },
+
       signal: {
         metric: "spending",
         month,
@@ -119,6 +174,7 @@ export const detectAnomalies = ({ transactions, currency }) => {
         intensity: robustZ >= 5 ? "extreme" : "moderate",
         trend,
       },
+
       context: {
         months_analyzed: historyValues.length,
         highest_in_period: total === maxVal,
@@ -128,18 +184,17 @@ export const detectAnomalies = ({ transactions, currency }) => {
         previous_value: previous,
         recent_history: formattedHistory,
       },
+
       impact: {
-        type: "overspending",
+        type: "unusual_spending",
         severity: robustZ >= 5 ? "HIGH" : "MEDIUM",
-        impact_hint:
-          deviationPercent > 100
-            ? "may significantly affect balance"
-            : "may affect balance",
+        impact_hint: "Spending is unusually high compared with recorded history",
       },
+
       recommendation: {
-        action_type: "reduce_spending",
-        action_hint: `Reduce spending in ${category}`,
-      }
+        action_type: "investigate_spending",
+        action_hint: `Identify what contributed to unusual ${category} spending`,
+      },
     });
   });
 

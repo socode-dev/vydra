@@ -209,8 +209,20 @@ const buildInsights = (referenceDate, transactions, budgets) => {
     .map((month) => sum(foodTransactions.filter((transaction) => transaction.date.startsWith(month))));
   const foodBaseline = median(historicalFood);
   const foodDeviation = Math.round(((currentFood - foodBaseline) / foodBaseline) * 100);
+  const previousFoodHigh = Math.max(...historicalFood);
+  const previousFoodHighIndex = historicalFood.lastIndexOf(previousFoodHigh);
+  const historicalFoodMonths = [...new Set(foodTransactions.map((transaction) => transaction.date.slice(0, 7)))]
+    .filter((month) => month !== latestMonth)
+    .sort()
+    .slice(-5);
+  const previousFoodHighMonth = historicalFoodMonths[previousFoodHighIndex];
+  const [previousFoodHighYear, previousFoodHighMonthNumber] = previousFoodHighMonth
+    .split("-")
+    .map(Number);
+  const previousFoodHighMonthLabel = monthLabel(
+    new Date(previousFoodHighYear, previousFoodHighMonthNumber - 1, 1),
+  );
   const foodBudget = budgets.find((budget) => budget.categoryKey === "txn:food");
-  const weeklyFoodBudget = foodBaseline / 4;
   const currentIncome = sum(transactions.filter((transaction) => transaction.type === "income" && transaction.date.startsWith(latestMonth)));
   const currentSpending = sum(transactions.filter((transaction) => transaction.type === "expense" && transaction.date.startsWith(latestMonth)));
   const amountOverIncome = Math.max(currentSpending - currentIncome, 0);
@@ -238,8 +250,8 @@ const buildInsights = (referenceDate, transactions, budgets) => {
       createdAt: created(6),
       expiresAt: expiresAfterTtl(created(6)),
       agent: {
-        explanation: `Your food spending in October was ${formatDemoAmount(currentFood)}, which is a huge jump from your usual ${formatDemoAmount(foodBaseline)} and the highest in recent months. This level of spending will definitely affect your overall budget.`,
-        suggestion: `Set a strict budget of ${formatDemoAmount(weeklyFoodBudget)} weekly for food in November to keep your total around ${formatDemoAmount(foodBaseline)} for the month.`,
+        explanation: `In ${monthLabel(latest)} ${latest.getFullYear()}, your spending in the Food category reached ${formatDemoAmount(currentFood)}, which is ${foodDeviation}% higher than your typical monthly spending of around ${formatDemoAmount(foodBaseline)}. This is also the highest amount recorded in the past ${historicalFood.length} months, surpassing your previous high of ${formatDemoAmount(previousFoodHigh)} in ${previousFoodHighMonthLabel}.`,
+        suggestion: `Review your food expenses for ${monthLabel(latest)} to identify what contributed to this increase, and consider setting a category budget for food if you find that similar spending patterns are likely to continue.`,
       },
       modelUsed: "Demo Rule Engine",
     },

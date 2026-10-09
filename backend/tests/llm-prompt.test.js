@@ -122,10 +122,13 @@ describe("prompt builders", () => {
         month: "2026, Jun",
         current_value: 900,
         baseline_value: 500,
+        deviation_absolute: 400,
         deviation_percent: 80,
       },
       context: {
         highest_in_period: true,
+        previous_highest_value: 500,
+        months_analyzed: 5,
         recent_history: [{ month: "2026, May", total: 500 }],
       },
       impact: { impact_hint: "may affect balance" },
@@ -133,8 +136,13 @@ describe("prompt builders", () => {
 
     const prompt = buildAnomalyPrompt({ anomaly });
 
-    expect(prompt).toContain("Food spending in 2026, Jun");
-    expect(prompt).toContain("This is the highest in recent months.");
+    expect(prompt).toContain("Category: Food");
+    expect(prompt).toContain("Period: 2026, Jun");
+    expect(prompt).toContain("Recorded spending: $900.00");
+    expect(prompt).toContain("Historical baseline: $500.00");
+    expect(prompt).toContain("Percentage increase: 80% higher");
+    expect(prompt).toContain("Previous highest: $500.00");
+    expect(prompt).toContain("Historical months analyzed: 5");
     expect(prompt.length).toBeLessThan(6000);
     assertPromptSanitized(prompt);
   });
