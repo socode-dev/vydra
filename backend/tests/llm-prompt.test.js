@@ -60,27 +60,27 @@ const minimalRiskData = () => ({
 const currency = "NGN";
 
 describe("prompt builders", () => {
-  it("includes systemic crisis instructions only when systemic crisis is present", () => {
+  it("includes the multiple-warning-signs state for both systemic and non-systemic risk", () => {
     const crisisPrompt = buildFinancialRiskPrompt({ riskData: fullRiskData(true) });
     const normalPrompt = buildFinancialRiskPrompt({ riskData: fullRiskData(false) });
 
-    expect(crisisPrompt).toContain("Multiple serious financial problems are happening at the same time.");
-    expect(normalPrompt).not.toContain("Multiple serious financial problems are happening at the same time.");
+    expect(crisisPrompt).toContain("Multiple severe warning signs: true");
+    expect(normalPrompt).toContain("Multiple severe warning signs: false");
   });
 
-  it("includes every major financial-risk signal when present and omits absent ones", () => {
+  it("includes every major financial-risk signal with its current value", () => {
     const fullPrompt = buildFinancialRiskPrompt({ riskData: fullRiskData(true) });
     const minimalPrompt = buildFinancialRiskPrompt({ riskData: minimalRiskData() });
 
-    expect(fullPrompt).toContain("Severe spending spikes detected: 2");
-    expect(fullPrompt).toContain("Budgets completely exceeded: 2");
-    expect(fullPrompt).toContain("Spending pressure level: HIGH");
-    expect(fullPrompt).toContain("Cashflow health: RISK");
+    expect(fullPrompt).toContain("Severe spending spikes: 2");
+    expect(fullPrompt).toContain("Exceeded budgets: 2");
+    expect(fullPrompt).toContain("Spending pressure: HIGH");
+    expect(fullPrompt).toContain("Cash Flow status: RISK");
 
-    expect(minimalPrompt).toContain("Severe spending spikes detected: 0");
-    expect(minimalPrompt).toContain("Budgets completely exceeded: 0");
-    expect(minimalPrompt).toContain("Spending pressure level: LOW");
-    expect(minimalPrompt).toContain("Cashflow health: SAFE");
+    expect(minimalPrompt).toContain("Severe spending spikes: 0");
+    expect(minimalPrompt).toContain("Exceeded budgets: 0");
+    expect(minimalPrompt).toContain("Spending pressure: LOW");
+    expect(minimalPrompt).toContain("Cash Flow status: SAFE");
   });
 
   it("never leaks undefined, null, or NaN into financial-risk prompts", () => {
